@@ -1,0 +1,10 @@
+## Interface: 50400
+## Title: WoWCron
+## Notes: Cron for WoW. v@VERSION@
+## Author: opussf
+## Version: @VERSION@
+## Description: Cron for WoW
+## SavedVariables: cron_global
+## SavedVariablesPerCharacter: cron_player
+wowcron.lua
+wowcron.xml
