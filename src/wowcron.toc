@@ -1,4 +1,4 @@
-## Interface: 50400
+## Interface: 60000
 ## Title: WoWCron
 ## Notes: Cron for WoW. v@VERSION@
 ## Author: opussf
