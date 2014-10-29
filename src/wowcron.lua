@@ -61,11 +61,19 @@ function wowCron.ADDON_LOADED()
 	wowCron_Frame:UnregisterEvent("ADDON_LOADED")
 
 	wowCron.ParseAll()
+	wowCron.BuildSlashCommands()
 	--INEED.OptionsPanel_Reset();
 	--wowCron.Print("Loaded")
 end
 
 -- Support Code
+function wowCron.BuildSlashCommands()
+	local count = 0
+	for k,v in pairs(SlashCmdList) do
+		count = count + 1
+		wowCron.Print(string.format("% 2i : %s", count, k))
+	end
+end
 function wowCron.RunNow( cmdIn, ts )
 	-- @param cmdIn command to test
 	-- @param ts optional ts to test with
