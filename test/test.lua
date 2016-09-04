@@ -15,12 +15,13 @@ require "wowcron"
 --require "INEEDOptions"
 
 function test.before()
-	cron_player = {"* * * * * /in item:54233 7", "0 * * * * /cheer"}
+	cron_player = {"* * * * * /in item:54233 7" }
 	cron_global = {
 		"* 0 * * * /happy",
 		"*/30 * * * * /cry",
 		"* 0,12 * * * /giggle",
 		"* * 1,15 * * /dance",
+		"0 * * * * /cheer"
 	}
 	wowCron.OnLoad()
 	wowCron.ADDON_LOADED()
@@ -85,6 +86,79 @@ function test.testExpand_dow_all()
 	local expandedDOW = wowCron.Expand( "*", "dow" )
 	test.validValues( expectedValues, expandedDOW )
 end
+function test.testParse()
+	vals = { wowCron.Parse("* * * * * cmd") }
+	assertEquals( "*", vals[1] )
+	assertEquals( "*", vals[2] )
+	assertEquals( "*", vals[3] )
+	assertEquals( "*", vals[4] )
+	assertEquals( "*", vals[5] )
+	assertEquals( "cmd", vals[6] )
+end
+function test.testExpand_hour_range()
+	local expectedValues = {}
+	for i = 0,12 do
+		expectedValues[i] = 1
+	end
+	local expandedHour = wowCron.Expand( "0-12", "hour" )
+	test.validValues( expectedValues, expandedHour )
+end
+function test.testExpand_hour_2values()
+	local expectedValues = {}
+	expectedValues[6] = 1
+	expectedValues[12] = 1
+	local expandedHour = wowCron.Expand( "6,12", "hour" )
+	test.validValues( expectedValues, expandedHour )
+end
+function test.testExpand_hour_3values()
+	local expectedValues = {}
+	expectedValues[6] = 1
+	expectedValues[12] = 1
+	expectedValues[18] = 1
+	local expandedHour = wowCron.Expand( "6,12,18", "hour" )
+	test.validValues( expectedValues, expandedHour )
+end
+function test.testExpand_hour_step()
+	local expectedValues = {}
+	expectedValues[0] = 1
+	expectedValues[6] = 1
+	expectedValues[12] = 1
+	expectedValues[18] = 1
+	local expandedHour = wowCron.Expand( "*/6", "hour" )
+	test.validValues( expectedValues, expandedHour )
+end
+function test.testExpand_hour_rangeWithStep()
+	local expectedValues = {}
+	expectedValues[0] = 1
+	expectedValues[6] = 1
+	expectedValues[12] = 1
+	expectedValues[18] = 1
+	local expandedHour = wowCron.Expand( "0-18/6", "hour" )
+	test.validValues( expectedValues, expandedHour )
+end
+function test.testExpand_hour_2values_rangeWStep()
+	local expectedValues = {}
+	expectedValues[0] = 1
+	expectedValues[3] = 1
+	expectedValues[6] = 1
+	expectedValues[12] = 1
+	expectedValues[18] = 1
+	local expandedHour = wowCron.Expand( "0-6/3,6-18/6", "hour" )
+	test.validValues( expectedValues, expandedHour )
+end
+function test.testExpand_hour_2values_wildWStep()
+	local expectedValues = {}
+	expectedValues[0] = 1
+	expectedValues[5] = 1
+	expectedValues[10] = 1
+	expectedValues[12] = 1
+	expectedValues[15] = 1
+	expectedValues[20] = 1
+	local expandedHour = wowCron.Expand( "*/12,*/5", "hour" )
+	test.validValues( expectedValues, expandedHour )
+end
+
+
 --[[
 
 function test.testRunNow_onMinute_yes()
