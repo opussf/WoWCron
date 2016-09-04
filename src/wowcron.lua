@@ -133,7 +133,9 @@ function wowCron.Expand( value, type )
 		e = e or s  -- if not a range, then set e to the value
 
 		for v = s, e, step do
-			out[v] = 1
+			if v >= minVal and v <= maxVal then  -- @TODO should this toss an error of some sort, or just quietly fail?  Where should the error be registered?
+				out[v] = 1
+			end
 		end
 	end
 	return out
