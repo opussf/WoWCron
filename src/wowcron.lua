@@ -23,11 +23,11 @@ wowCron.events = {}  -- [nextTS] = {[1]={['event'] = 'runME', ['fullEvent'] = '*
 -- meh, ['fullEvent'] = ts
 wowCron.nextEvent = 0
 wowCron.ranges = {
-	["min"] = {0,59},
-	["hour"] = {0,23},
+	["min"]   = {0,59},
+	["hour"]  = {0,23},
 	["month"] = {1,12},
-	["day"] = {1,31},
-	["dow"] = {0,7}, -- 0 and 7 is sunday
+	["day"]   = {1,31},
+	["dow"]   = {0,7}, -- 0 and 7 is sunday
 }
 
 -- events
