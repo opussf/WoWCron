@@ -27,7 +27,7 @@ wowCron.ranges = {
 	["hour"] = {0,23},
 	["month"] = {1,12},
 	["day"] = {1,31},
-	["dow"] = {0,7},
+	["dow"] = {0,7}, -- 0 and 7 is sunday
 }
 
 -- events
@@ -92,6 +92,13 @@ function wowCron.Expand( value, type )
 
 	-- valid min/max values are in wowCron.ranges.type
 	local minVal, maxVal = unpack(wowCron.ranges[type])
+
+	-- Expand * to min-max
+	value = string.gsub(value, "*", minVal.."-"..maxVal)
+	print(value)
+
+	valueList = strsplit( ",", value )
+
 
 	local out = {}
 	for i = minVal, maxVal do
