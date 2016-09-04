@@ -135,6 +135,26 @@ function getglobal( globalStr )
 end
 function hooksecurefunc(externalFunc, internalFunc)
 end
+function strsplit( delim, subject, pieces )
+	-- delim is a string that defines all the bytes that may split the string
+	-- subject is the string to work with
+	-- pieces (optional) is the maximum number of pieces to return
+	splitTable = {}
+	--print("strsplit( "..delim..", "..subject..", "..(pieces or "nil").." )")
+	pos, count = 1, 1
+	while true do
+		s, e = strfind(subject, delim, pos)
+		if s and (pieces and count<pieces) then -- found delim in subject
+			tinsert( splitTable, strsub( subject, pos, s-1 ) )
+			pos = s + 1
+			count = count + 1
+		else
+			tinsert( splitTable, strsub( subject, pos ) )
+			break
+		end
+	end
+	return unpack(splitTable)
+end
 
 -- WOW's structures
 SlashCmdList = {}
