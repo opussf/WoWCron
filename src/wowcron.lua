@@ -88,29 +88,18 @@ function wowCron.RunNow( cmdIn, ts )
 
 	-- expand the string pattern to a keyed truth table
 	for k,v in pairs( wowCron.fieldNames ) do -- 1 based array of field names, k = int, v = str
---		print(k..":"..v)
 		parsed[k] = wowCron.Expand( parsed[k], v )
 	end
 	-- parsed[2] = {[5] = 1, [10] = 1}  2 equates to the 2nd value in fieldNames
 
+	-- this is technically incorrect, will have to revisit this later.
+	-- wday and day should be or if they are not wild cards.
 	isMatch = true
 	for i, fieldName in pairs( wowCron.fieldNames ) do
---		print(i.."::"..fieldName.."("..ts[fieldName]..")")
 		isMatch = isMatch and wowCron.TableHasKey( parsed[i], ts[fieldName] )
---		print(isMatch)
 	end
 
 	return isMatch, parsed[6]
-
---[[
-
-	for k,v in pairs( wowCron.fieldNames ) do
-		print(k.."::"..v.."("..ts[v]..")")
-		for kk,vv in pairs( parsed[k] ) do
-			print("\t"..kk..":"..vv)
-		end
-	end
-]]
 end
 function wowCron.TableHasKey( table, key )
 	-- loop over the table, return true if any of the keys equal the given key
