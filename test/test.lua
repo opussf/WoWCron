@@ -78,13 +78,13 @@ function test.testExpand_day_all()
 	local expandedDay = wowCron.Expand( "*", "day" )
 	test.validValues( expectedValues, expandedDay )
 end
-function test.testExpand_dow_all()
+function test.testExpand_wday_all()
 	local expectedValues = {}
 	for i = 0,7 do
 		expectedValues[i] = 1
 	end
-	local expandedDOW = wowCron.Expand( "*", "dow" )
-	test.validValues( expectedValues, expandedDOW )
+	local expandedWDAY = wowCron.Expand( "*", "wday" )
+	test.validValues( expectedValues, expandedWDAY )
 end
 function test.testParse()
 	vals = { wowCron.Parse("* * * * * cmd") }
@@ -157,15 +157,20 @@ function test.testExpand_hour_2values_wildWStep()
 	local expandedHour = wowCron.Expand( "*/12,*/5", "hour" )
 	test.validValues( expectedValues, expandedHour )
 end
-
-
---[[
-
+function test.testExpand_hour_outOfRange_single()
+	--expectedValues = {}
+	local expandedHour = wowCron.Expand( "25", "hour")
+	assertIsNil( expandedHour[25] )
+end
 function test.testRunNow_onMinute_yes()
 	local ts = 1401054240 -- Sunday 14:44
 	local run, cmd = wowCron.RunNow( "* * * * * /hello", ts )
 	assertTrue( run, "This should be true" )
-	assertEquals( cmd, "/hello" )
+end
+function test.testRunNow_returns_cmd()
+	local ts = 1401054240 -- Sunday 14:44
+	local run, cmd = wowCron.RunNow( "* * * * * /hello", ts )
+	assertEquals( "/hello", cmd )
 end
 function test.testRunNow_onMinute5_yes()
 	local ts = 1401055500  -- Sunday 15:05
@@ -173,10 +178,18 @@ function test.testRunNow_onMinute5_yes()
 	print( time() % 60 )
 	local run, cmd = wowCron.RunNow( "*/5 * * * * /hello", ts )
 	assertTrue( run, "This should be true" )
-	assertEquals( cmd, "/hello" )
+end
+function test.testRunNow_onMinute5_no()
+	local ts = 1401054240  -- Sunday 14:44
+	print( time() )
+	print( time() % 60 )
+	local run, cmd = wowCron.RunNow( "*/5 * * * * /hello", ts )
+	assertIsNil( run, "This should be nil" )
 end
 
-]]
+
+
+
 --[[
 
 function test.testParseSets_nextEvent()
