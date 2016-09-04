@@ -21,7 +21,8 @@ cron_global = {}
 cron_player = {}
 wowCron.events = {}  -- [nextTS] = {[1]={['event'] = 'runME', ['fullEvent'] = '* * * * * runMe'}}
 -- meh, ['fullEvent'] = ts
-wowCron.nextEvent = 0
+-- meh, meh...  [1] = '* * * * * runMe', [2] = "* * * * * other"
+--wowCron.nextEvent = 0
 wowCron.ranges = {
 	["min"]   = {0,59},
 	["hour"]  = {0,23},
@@ -45,17 +46,24 @@ function wowCron.OnUpdate()
 	if (wowCron.lastUpdated < nowTS) and (now.sec == 0) then
 		wowCron.lastUpdated = nowTS
 		wowCron.Print("On the minute. "..(nowTS % 60))
+		for _,cron in pairs( wowCron.events ) do
+			runNow, cmd = wowCron.RunNow( cron )
+			if runNow then
+				print("do now: "..cmd)
+			end
+
+		end
+--[[
 		for cron, ts in pairs(wowCron.events) do
 			if (ts < nowTS) then -- has not been run yet
 			end
 			local run, cmd = wowCron.RunNow( cron )
-
 		end
+]]
 		if (now.min == 0) then
 			wowCron.Print("On the hour")
 		end
 	end
-
 end
 function wowCron.ADDON_LOADED()
 	-- Unregister the event for this method.
@@ -145,13 +153,11 @@ function wowCron.ParseAll()
 	-- Only when starting, or changing
 	wowCron.events = {}
 	for _, cmd in ipairs(cron_global) do
-		wowCron.events[cmd] = 0
-		--wowCron.Parse( cmd )
+		tinsert( wowCron.events, cmd )
 	end
-	-- player specific override global
+	-- player specific events
 	for _, cmd in ipairs(cron_player) do
-		wowCron.events[cmd] = 0
-		--wowCron.Parse( cmd )
+		tinsert( wowCron.events, cmd )
 	end
 
 end
