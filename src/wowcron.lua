@@ -27,8 +27,9 @@ wowCron.ranges = {
 	["hour"]  = {0,23},
 	["month"] = {1,12},
 	["day"]   = {1,31},
-	["dow"]   = {0,7}, -- 0 and 7 is sunday
+	["wday"]  = {0,7}, -- 0 and 7 is sunday
 }
+wowCron.fieldNames = { "min", "hour", "month", "day", "wday" }
 
 -- events
 function wowCron.OnLoad()
@@ -78,12 +79,46 @@ function wowCron.RunNow( cmdIn, ts )
 	-- @param cmdIn command to test
 	-- @param ts optional ts to test with
 	-- @return boolean run this command now (1, nil)
-	-- @return string command to run
-	local min, hour, day, month, dow, cmd = wowCron.Parse( cmdIn )
-	ts = ts or time()
-	local ts = date( "*t", ts )
-	--print(ts.hour..":"..ts.min)
+	-- @return string command to run (cmd, nil)
 
+	-- put all six values into parsed table
+	parsed = { wowCron.Parse( cmdIn ) }
+	local ts = ts or time()
+	local ts = date( "*t", ts )
+
+	-- expand the string pattern to a keyed truth table
+	for k,v in pairs( wowCron.fieldNames ) do -- 1 based array of field names, k = int, v = str
+--		print(k..":"..v)
+		parsed[k] = wowCron.Expand( parsed[k], v )
+	end
+	-- parsed[2] = {[5] = 1, [10] = 1}  2 equates to the 2nd value in fieldNames
+
+	isMatch = true
+	for i, fieldName in pairs( wowCron.fieldNames ) do
+--		print(i.."::"..fieldName.."("..ts[fieldName]..")")
+		isMatch = isMatch and wowCron.TableHasKey( parsed[i], ts[fieldName] )
+--		print(isMatch)
+	end
+
+	return isMatch, parsed[6]
+
+--[[
+
+	for k,v in pairs( wowCron.fieldNames ) do
+		print(k.."::"..v.."("..ts[v]..")")
+		for kk,vv in pairs( parsed[k] ) do
+			print("\t"..kk..":"..vv)
+		end
+	end
+]]
+end
+function wowCron.TableHasKey( table, key )
+	-- loop over the table, return true if any of the keys equal the given key
+	for k in pairs( table ) do
+		if key == k then
+			return true
+		end
+	end
 end
 function wowCron.Expand( value, type )
 	-- @parm value Value to expand
@@ -95,7 +130,7 @@ function wowCron.Expand( value, type )
 
 	-- Expand * to min-max
 	value = string.gsub(value, "*", minVal.."-"..maxVal)
-
+	-- split the values on ,
 	valueList = { strsplit( ",", value ) }
 	out = {}
 
@@ -111,7 +146,6 @@ function wowCron.Expand( value, type )
 		for v = s, e, step do
 			out[v] = 1
 		end
-
 	end
 	return out
 end
@@ -131,12 +165,10 @@ function wowCron.ParseAll()
 
 end
 function wowCron.Parse( cron )
-	-- takes
-	local min, hour, day, month, dow, cmd =
+	-- takes the cron string and returns the 5 cron patterns, and the command
+	local min, hour, day, month, wday, cmd =
 			strmatch( cron,	"^(%S+)%s*(%S+)%s*(%S+)%s*(%S+)%s*(%S+)%s*(.*)$" )
-	--wowCron.Print( cron.." = m:"..min.." h:"..hour.." d:"..day.." m:"..month.." w:"..dow.." c:"..cmd )
-	return min, hour, day, month, dow, cmd
-	--wowCron.CalculatePossibleValues( "min", min )
+	return min, hour, day, month, wday, cmd
 end
 
 --[[
