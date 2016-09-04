@@ -95,14 +95,23 @@ function wowCron.Expand( value, type )
 
 	-- Expand * to min-max
 	value = string.gsub(value, "*", minVal.."-"..maxVal)
-	print(value)
 
-	valueList = strsplit( ",", value )
+	valueList = { strsplit( ",", value ) }
+	out = {}
 
+	for _,value in ipairs(valueList) do
+		svalue, step = strmatch( value, "^(%S*)/(%S*)$" )
+		if step then value = svalue end
+		step = step or 1
 
-	local out = {}
-	for i = minVal, maxVal do
-		out[i] = 1
+		s, e = strmatch( value, "^(%d+)-(%d+)$")
+		s = s or value  -- if not a range, then set s to the value
+		e = e or s  -- if not a range, then set e to the value
+
+		for v = s, e, step do
+			out[v] = 1
+		end
+
 	end
 	return out
 end
