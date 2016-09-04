@@ -142,9 +142,10 @@ function strsplit( delim, subject, pieces )
 	splitTable = {}
 	--print("strsplit( "..delim..", "..subject..", "..(pieces or "nil").." )")
 	pos, count = 1, 1
+	pieces = pieces or string.len(subject)
 	while true do
 		s, e = strfind(subject, delim, pos)
-		if s and (pieces and count<pieces) then -- found delim in subject
+		if (s and count<pieces) then -- found delim in subject
 			tinsert( splitTable, strsub( subject, pos, s-1 ) )
 			pos = s + 1
 			count = count + 1
