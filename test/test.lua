@@ -40,7 +40,12 @@ function test.validValues( expected, actual )
 end
 function test.testADDON_LOADED_buildsEventsTable()
 	-- this should already be loaded
-	assertEquals( 0, wowCron.events["* * * * * /in item:54233 7"] )
+	size = 0
+	for k,v in pairs( wowCron.events ) do
+		size = size + 1
+	end
+	assertEquals( 6, size )
+	--assertEquals( 0, wowCron.events["* * * * * /in item:54233 7"] )
 end
 function test.testExpand_minute_all()
 	local expectedValues = {}
@@ -174,15 +179,15 @@ function test.testRunNow_returns_cmd()
 end
 function test.testRunNow_onMinute5_yes()
 	local ts = 1401055500  -- Sunday 15:05
-	print( time() )
-	print( time() % 60 )
+	--print( time() )
+	--print( time() % 60 )
 	local run, cmd = wowCron.RunNow( "*/5 * * * * /hello", ts )
 	assertTrue( run, "This should be true" )
 end
 function test.testRunNow_onMinute5_no()
 	local ts = 1401054240  -- Sunday 14:44
-	print( time() )
-	print( time() % 60 )
+	--print( time() )
+	--print( time() % 60 )
 	local run, cmd = wowCron.RunNow( "*/5 * * * * /hello", ts )
 	assertIsNil( run, "This should be nil" )
 end
