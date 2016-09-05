@@ -89,7 +89,7 @@ function wowCron.BuildSlashCommands()
 	local count = 0
 	for k,v in pairs(SlashCmdList) do
 		count = count + 1
-		wowCron.Print(string.format("% 2i : %s", count, k))
+		--wowCron.Print(string.format("% 2i : %s", count, k))
 		cron_knownSlashCmds[k] = v
 		lcv = 1
 		while true do
@@ -162,7 +162,7 @@ function wowCron.Expand( value, type )
 
 		for v = s, e, step do
 			if v >= minVal and v <= maxVal then  -- @TODO should this toss an error of some sort, or just quietly fail?  Where should the error be registered?
-				out[v] = 1
+				out[type == "wday" and v+1 or v] = 1 -- add one for the wday conversion
 			end
 		end
 	end
