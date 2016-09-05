@@ -4,7 +4,7 @@
 ## Author: opussf
 ## Version: @VERSION@
 ## Description: Cron for WoW
-## SavedVariables: cron_global
+## SavedVariables: cron_global cron_knownSlashCmds
 ## SavedVariablesPerCharacter: cron_player
 wowcron.lua
 wowcron.xml
