@@ -85,7 +85,7 @@ function test.testExpand_day_all()
 end
 function test.testExpand_wday_all()
 	local expectedValues = {}
-	for i = 0,7 do
+	for i = 1,8 do  -- adjusted for Lua's date wday (1 = Sunday)
 		expectedValues[i] = 1
 	end
 	local expandedWDAY = wowCron.Expand( "*", "wday" )
@@ -177,6 +177,11 @@ function test.testRunNow_returns_cmd()
 	local run, cmd = wowCron.RunNow( "* * * * * /hello", ts )
 	assertEquals( "/hello", cmd )
 end
+function test.testRunNow_returns_cmdParameters()
+	local ts = 1401054240 -- Sunday 14:44
+	local run, cmd = wowCron.RunNow( "* * * * * /say Hello", ts )
+	assertEquals( "/say Hello", cmd )
+end
 function test.testRunNow_onMinute5_yes()
 	local ts = 1401055500  -- Sunday 15:05
 	--print( time() )
@@ -191,25 +196,17 @@ function test.testRunNow_onMinute5_no()
 	local run, cmd = wowCron.RunNow( "*/5 * * * * /hello", ts )
 	assertIsNil( run, "This should be nil" )
 end
-
-
-
-
---[[
-
-function test.testParseSets_nextEvent()
-	wowCron.Command( "* * * * * /openfire" )
-	assertEquals( nextMin, wowCron.nextEvent, "nextEvent should be the TS of the next top of the minute")
+function test.testRunNow_onSunday_yes()
+	local ts = 1401054240  -- Sunday 14:44
+	local run, cmd = wowCron.RunNow( "* * * * 0 /hello", ts )
+	assertTrue( run, "This should be true" )
 end
-function test.testParseSets_events_event()
-	wowCron.Command( "* * * * * /openfire" )
-	assertEquals( "/openfire", wowCron.events[nextMin][1].event, "The event field should be set")
-end
-function test.testParseSets_events_fullEvent()
-	wowCron.Command( "* * * * * /openfire" )
-	assertEquals( "* * * * * /openfire", wowCron.events[nextMin][1].fullEvent )
+function test.testRunNow_onSunday_no()
+	local ts = 1401054240  -- Sunday 14:44
+	local run, cmd = wowCron.RunNow( "* * * * 1-6 /hello", ts )
+	assertIsNil( run, "This should be nil" )
 end
 
-]]
+
 
 test.run()
