@@ -19,6 +19,7 @@ COLOR_END = "|r";
 wowCron = {}
 cron_global = {}
 cron_player = {}
+cron_knownSlashCmds = {}
 wowCron.events = {}  -- [nextTS] = {[1]={['event'] = 'runME', ['fullEvent'] = '* * * * * runMe'}}
 -- meh, ['fullEvent'] = ts
 -- meh, meh...  [1] = '* * * * * runMe', [2] = "* * * * * other"
@@ -38,6 +39,7 @@ function wowCron.OnLoad()
 	SlashCmdList["CRON"] = function(msg) wowCron.Command(msg); end
 
 	wowCron_Frame:RegisterEvent("ADDON_LOADED")
+	wowCron_Frame:RegisterEvent("PLAYER_ENTERING_WORLD")
 	wowCron.lastUpdated = time()
 end
 function wowCron.OnUpdate()
@@ -49,17 +51,20 @@ function wowCron.OnUpdate()
 		for _,cron in pairs( wowCron.events ) do
 			runNow, cmd = wowCron.RunNow( cron )
 			if runNow then
-				print("do now: "..cmd)
+				slash, parameters = wowCron.DeconstructCmd( cmd )
+				print("do now: "..cmd.." -->"..slash)
+				-- find the function to call based on the slashcommand
+				for k,v in pairs( cron_knownSlashCmds ) do
+					if slash == k then
+						-- call the function
+						cron_knownSlashCmds[v]( parameters )
+						break
+					end
+				end
+
 			end
 
 		end
---[[
-		for cron, ts in pairs(wowCron.events) do
-			if (ts < nowTS) then -- has not been run yet
-			end
-			local run, cmd = wowCron.RunNow( cron )
-		end
-]]
 		if (now.min == 0) then
 			wowCron.Print("On the hour")
 		end
@@ -74,6 +79,10 @@ function wowCron.ADDON_LOADED()
 	--INEED.OptionsPanel_Reset();
 	--wowCron.Print("Loaded")
 end
+function wowCron.PLAYER_ENTERING_WORLD()
+	wowCron_Frame:UnregisterEvent("PLAYER_ENTERING_WORLD")
+	wowCron.BuildSlashCommands()
+end
 
 -- Support Code
 function wowCron.BuildSlashCommands()
@@ -81,6 +90,17 @@ function wowCron.BuildSlashCommands()
 	for k,v in pairs(SlashCmdList) do
 		count = count + 1
 		wowCron.Print(string.format("% 2i : %s", count, k))
+		cron_knownSlashCmds[k] = v
+		lcv = 1
+		while true do
+			teststr = "SLASH_"..k..lcv
+			gggg = _G[ teststr ]
+			if not gggg then break end
+			--print("_G["..teststr.."] = "..gggg)
+			cron_knownSlashCmds[gggg] = k
+			if lcv >= 10 then break end
+			lcv = lcv + 1
+		end
 	end
 end
 function wowCron.RunNow( cmdIn, ts )
@@ -168,6 +188,15 @@ function wowCron.Parse( cron )
 	return min, hour, day, month, wday, cmd
 end
 
+function wowCron.DeconstructCmd( cmdIn )
+	cmdIn = string.lower( cmdIn )
+	local a,b,c = strfind( cmdIn, "(%S+)" )
+	if a then
+		return c, strsub( cmdIn, b+2 )
+	else
+		return ""
+	end
+end
 --[[
 function wowCron.CalculatePossibleValues( field, inValue )
 	local minValue
