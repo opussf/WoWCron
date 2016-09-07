@@ -55,9 +55,10 @@ function wowCron.OnUpdate()
 				print("do now: "..cmd.." -->"..slash)
 				-- find the function to call based on the slashcommand
 				for k,v in pairs( cron_knownSlashCmds ) do
-					if slash == k then
+					if string.lower(slash) == string.lower(k) then
+						--print(k.." is of type:"..type(v))
 						-- call the function
-						cron_knownSlashCmds[v]( parameters )
+						v( parameters )
 						break
 					end
 				end
@@ -89,7 +90,7 @@ function wowCron.BuildSlashCommands()
 	local count = 0
 	for k,v in pairs(SlashCmdList) do
 		count = count + 1
-		--wowCron.Print(string.format("% 2i : %s", count, k))
+		wowCron.Print(string.format("% 2i : %s :: %s", count, k, type(v)))
 		cron_knownSlashCmds[k] = v
 		lcv = 1
 		while true do
@@ -97,7 +98,7 @@ function wowCron.BuildSlashCommands()
 			gggg = _G[ teststr ]
 			if not gggg then break end
 			--print("_G["..teststr.."] = "..gggg)
-			cron_knownSlashCmds[gggg] = k
+			cron_knownSlashCmds[gggg] = v
 			if lcv >= 10 then break end
 			lcv = lcv + 1
 		end
