@@ -55,8 +55,11 @@ function wowCron.OnUpdate()
 				slash, parameters = wowCron.DeconstructCmd( cmd )
 				print("do now: "..cmd.." -->"..slash.." "..parameters)
 				-- find the function to call based on the slashcommand
-				isGood = wowCron.CallAddon( slash, parameters ) or
-						wowCron.CallEmote( slash, parameters )
+				isGood = false
+				for _,func in ipairs(wowCron.actionsList) do
+					isGood = isGood or func( slash, parameters )
+					if isGood then break end
+				end
 			end
 		end
 		if (now.min == 0) then
@@ -79,6 +82,7 @@ function wowCron.PLAYER_ENTERING_WORLD()
 end
 
 -- Support Code
+wowCron.actionsList = {}
 function wowCron.CallAddon( slash, parameters )
 	-- loop through cron_knownSlashCmds (for other loaded addons)
 	-- return true if could handle the slash command
@@ -90,11 +94,11 @@ function wowCron.CallAddon( slash, parameters )
 		end
 	end
 end
+wowCron.actionsList[1] = wowCron.CallAddon
 function wowCron.CallEmote( slash, parameters )
 	-- look for emote in cron_knownEmotes for emotes to call
 	-- return true if could handle the slash command
 	token = string.upper(strsub( slash, -(strlen( slash )-1) ))
-	print(token)
 	for _,v in pairs( cron_knownEmotes ) do
 		if token == v then
 			DoEmote(token)
@@ -102,6 +106,18 @@ function wowCron.CallEmote( slash, parameters )
 		end
 	end
 end
+wowCron.actionsList[2] = wowCron.CallEmote
+function wowCron.RunScript( slash, parameters )
+	slash = string.lower( slash )
+	print("RunScript( "..slash..", "..parameters.." )")
+	if slash == "/run" or slash == "/script" then
+		print("Calling "..parameters)
+		loadstring(parameters)()
+		return true
+	end
+end
+wowCron.actionsList[3] = wowCron.RunScript
+
 function wowCron.BuildSlashCommands()
 	local count = 0
 	for k,v in pairs(SlashCmdList) do
@@ -210,7 +226,6 @@ function wowCron.Parse( cron )
 end
 
 function wowCron.DeconstructCmd( cmdIn )
-	cmdIn = string.lower( cmdIn )
 	local a,b,c = strfind( cmdIn, "(%S+)" )
 	if a then
 		return c, strsub( cmdIn, b+2 )
