@@ -204,8 +204,37 @@ function test.testRunNow_onSunday_no()
 end
 function test.testRunNow_noCmd()
 	local ts = 1401054240 -- Sunday 14:44
-	local run, cmd = wowCron.RunNow( "* * * * *", ts )
+	local run, cmd = wowCron.RunNow( "* * * * * ", ts )
 	assertEquals( "", cmd )
+end
+function test.testRunNow_noCmd_noTrailingSpace()
+	local ts = 1401054240 -- Sunday 14:44
+	local run, cmd = wowCron.RunNow( "* * * * *", ts )
+	assertIsNil( run, "This should be nil" )
+end
+
+function test.testRunNow_macro_hourly()
+	local ts = 1401055200 -- Sunday 15:00
+	local run, cmd = wowCron.RunNow( "@hourly /hello", ts )
+	assertTrue( run, "This should be true" )
+end
+function test.testRunNow_macro_midnight()
+	local ts = 1401001200 -- Sunday 00:00
+	local run, cmd = wowCron.RunNow( "@midnight /hello", ts )
+	assertTrue( run, "This should be true" )
+end
+function test.testRunNow_macro_firstminute_runs()
+	local run, cmd = wowCron.RunNow( "@first /hello" )
+	assertTrue( run, "This should be true" )
+end
+function test.testRunNow_macro_firstminute_runs_upper()
+	local run, cmd = wowCron.RunNow( "@FIRST /hello" )
+	assertTrue( run, "This should be true" )
+end
+function test.testRunNow_macro_firstminute_doesNotRun()
+	wowCron.started = 1401001200 -- started a LONG time ago
+	local run, cmd = wowCron.RunNow( "@first /hello" )
+	assertIsNil( run, "This should be nil" )
 end
 function test.testCmd_global_flag()
 	wowCron.Command("global")

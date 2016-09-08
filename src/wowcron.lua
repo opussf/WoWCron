@@ -31,6 +31,10 @@ wowCron.ranges = {
 	["wday"]  = {0,7}, -- 0 and 7 is sunday
 }
 wowCron.fieldNames = { "min", "hour", "month", "day", "wday" }
+wowCron.macros = {
+	["@hourly"]   = "0 * * * *",
+	["@midnight"] = "0 0 * * *",
+}
 
 -- events
 function wowCron.OnLoad()
@@ -40,6 +44,7 @@ function wowCron.OnLoad()
 	wowCron_Frame:RegisterEvent("ADDON_LOADED")
 	wowCron_Frame:RegisterEvent("PLAYER_ENTERING_WORLD")
 	wowCron.lastUpdated = time()
+	wowCron.started = time()
 end
 function wowCron.OnUpdate()
 	nowTS = time()
@@ -144,8 +149,21 @@ function wowCron.RunNow( cmdIn, ts )
 	-- @return boolean run this command now (1, nil)
 	-- @return string command to run (cmd, nil)
 
+	-- do the macro expansion here, since I want to return true for @first if within the first ~60 seconds of being run.
+	local macro, cmd = strmatch( cmdIn, "^(@%S+)%s+(.*)$" )
+	if macro then
+		if string.lower(macro) == "@first" and (time() - wowCron.started) <= 60 then  -- @first and first run, return true
+			return true, cmd
+		elseif wowCron.macros[macro] then -- not @first, but is in the list of macros, expand the macro
+			cmdIn = wowCron.macros[macro].." "..cmd
+		end -- invalid cron should be found later
+	end
+
 	-- put all six values into parsed table
 	parsed = { wowCron.Parse( cmdIn ) }
+	if #parsed == 0 then -- no values returned.  Invalid cron
+		return -- return nil (no run)
+	end
 	local ts = ts or time()
 	local ts = date( "*t", ts )
 
@@ -214,12 +232,14 @@ function wowCron.ParseAll()
 	for _, cmd in ipairs(cron_player) do
 		tinsert( wowCron.events, cmd )
 	end
-
 end
 function wowCron.Parse( cron )
 	-- takes the cron string and returns the 5 cron patterns, and the command
+	-- returns nil if this encounters a bad pattern
+
+	-- parse the 6, space delimited values.
 	local min, hour, day, month, wday, cmd =
-			strmatch( cron,	"^(%S+)%s*(%S+)%s*(%S+)%s*(%S+)%s*(%S+)%s*(.*)$" )
+			strmatch( cron,	"^(%S+)%s+(%S+)%s+(%S+)%s+(%S+)%s+(%S+)%s+(.*)$" )
 	return min, hour, day, month, wday, cmd
 end
 
