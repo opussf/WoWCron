@@ -206,6 +206,34 @@ function test.testRunNow_onSunday_no()
 	local run, cmd = wowCron.RunNow( "* * * * 1-6 /hello", ts )
 	assertIsNil( run, "This should be nil" )
 end
+function test.testCmd_global_flag()
+	wowCron.Command("global")
+	assertTrue( wowCron.global )
+end
+function test.testCmd_global_list()
+	wowCron.Command("global list")
+end
+function test.testCmd_player_list()
+	wowCron.Command("list")
+end
+function test.testCmd_global_rm()
+	wowCron.Command("global rm 1")
+	assertEquals( "*/30 * * * * /cry", cron_global[1] )
+end
+function test.testCmd_player_rm()
+	wowCron.Command("rm 1")
+	print(wowCron.global or "nil")
+	assertEquals( 0, #cron_player )
+end
+function test.testCmd_global_add()
+	wowCron.Command("global * * * * * /cron list")
+	assertEquals( "* * * * * /cron list", cron_global[6] )
+end
+function test.testCmd_player_add()
+	wowCron.Command("* * * * * /cron list")
+	assertEquals( "* * * * * /cron list", cron_player[2] )
+end
+
 
 
 

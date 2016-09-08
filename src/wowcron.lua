@@ -3,7 +3,6 @@ WOWCRON_MSG_VERSION   = GetAddOnMetadata(INEED_MSG_ADDONNAME,"Version");
 WOWCRON_MSG_AUTHOR    = "opussf";
 
 -- Colours
---[[
 COLOR_RED = "|cffff0000";
 COLOR_GREEN = "|cff00ff00";
 COLOR_BLUE = "|cff0000ff";
@@ -14,7 +13,6 @@ COLOR_GREY = "|cff808080";
 COLOR_GOLD = "|cffcfb52b";
 COLOR_NEON_BLUE = "|cff4d4dff";
 COLOR_END = "|r";
-]]
 
 wowCron = {}
 cron_global = {}
@@ -233,34 +231,64 @@ function wowCron.DeconstructCmd( cmdIn )
 		return ""
 	end
 end
---[[
-function wowCron.CalculatePossibleValues( field, inValue )
-	local minValue
-end
-]]
-
---[[
-if msg then
-		local i,c = strmatch(msg, "^(|c.*|r)%s*(%d*)$")
-		if i then  -- i is an item, c is a count or nil
-			return i, c
-		else  -- Not a valid item link
-			msg = string.lower(msg)
-			local a,b,c = strfind(msg, "(%S+)")  --contiguous string of non-space characters
-			if a then
-				-- c is the matched string, strsub is everything after that, skipping the space
-				return c, strsub(msg, b+2)
-			else
-				return ""
-			end
-		end
+function wowCron.PrintHelp()
+	wowCron.Print("")
+	for cmd, info in pairs(wowCron.CommandList) do
+		wowCron.Print(string.format("%s %s %s -> %s",
+			SLASH_CRON1, cmd, info.help[1], info.help[2]))
 	end
 end
-]]
-
-
-function wowCron.Command( msg )
-	wowCron.Parse( msg )
+function wowCron.List()
+	cronTable = wowCron.global and cron_global or cron_player
+	for i,entry in ipairs(cronTable) do
+		wowCron.Print( string.format("[% 3i] %s", i, entry) )
+	end
+end
+function wowCron.Remove( index )
+	cronTable = wowCron.global and cron_global or cron_player
+	index = tonumber(index)
+	if index and index>0 and index<=#cronTable then
+		local entry = table.remove( cronTable, index )
+		wowCron.Print( COLOR_RED.."REMOVING: "..COLOR_END..entry )
+	end
+end
+function wowCron.AddEntry( entry )
+	cronTable = wowCron.global and cron_global or cron_player
+	table.insert( cronTable, entry )
+	wowCron.Print( string.format("Added to %s: %s", (wowCron.global and "global" or "personal"), entry ) )
+end
+wowCron.CommandList = {
+	["help"] = {
+		["func"] = wowCron.PrintHelp,
+		["help"] = {"","Print this help."},
+	},
+	["global"] = {
+		["func"] = function( msg ) wowCron.Command( msg, true ); end,
+		["help"] = {"<commands>", "Sets global flag"},
+	},
+	["list"] = {
+		["func"] = wowCron.List,
+		["help"] = {"", "List cron entries."}
+	},
+	["rm"] = {
+		["func"] = wowCron.Remove,
+		["help"] = {"index", "Remove index entry."}
+	},
+	["add"] = {
+		["func"] = wowCron.AddEntry,
+		["help"] = {"<entry>", "Adds an entry. Default action."}
+	},
+}
+function wowCron.Command( msg, isGlobal )
+	wowCron.global = isGlobal
+	cmd, parameters = wowCron.DeconstructCmd( msg )
+	cmd = string.lower(cmd)
+	local cmdFunc = wowCron.CommandList[cmd]
+	if cmdFunc then
+		cmdFunc.func( parameters )
+	else
+		wowCron.AddEntry( msg )
+	end
 end
 function wowCron.Print( msg, showName)
 	-- print to the chat frame
