@@ -107,9 +107,9 @@ end
 wowCron.actionsList[2] = wowCron.CallEmote
 function wowCron.RunScript( slash, parameters )
 	slash = string.lower( slash )
-	print("RunScript( "..slash..", "..parameters.." )")
+	--print("RunScript( "..slash..", "..parameters.." )")
 	if slash == "/run" or slash == "/script" then
-		print("Calling "..parameters)
+		--print("Calling "..parameters)
 		loadstring(parameters)()
 		return true
 	end
