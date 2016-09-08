@@ -240,6 +240,7 @@ function wowCron.PrintHelp()
 end
 function wowCron.List()
 	cronTable = wowCron.global and cron_global or cron_player
+	wowCron.Print( "Listing cron entries for "..( wowCron.global and "global" or "personal" ) )
 	for i,entry in ipairs(cronTable) do
 		wowCron.Print( string.format("[% 3i] %s", i, entry) )
 	end
