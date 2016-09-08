@@ -26,3 +26,4 @@ wowCron.events[TS] is a list of events to run
 
 ----
 
+/console scriptErrors 1
