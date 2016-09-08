@@ -1,10 +1,10 @@
-## Interface: 60000
+## Interface: @INTERFACE@
 ## Title: WoWCron
 ## Notes: Cron for WoW. v@VERSION@
 ## Author: opussf
 ## Version: @VERSION@
 ## Description: Cron for WoW
-## SavedVariables: cron_global
+## SavedVariables: cron_global cron_knownSlashCmds cron_knownEmotes
 ## SavedVariablesPerCharacter: cron_player
 wowcron.lua
 wowcron.xml

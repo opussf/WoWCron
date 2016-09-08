@@ -15,12 +15,13 @@ require "wowcron"
 --require "INEEDOptions"
 
 function test.before()
-	cron_player = {"* * * * * /in item:54233 7", "0 * * * * /cheer"}
+	cron_player = {"* * * * * /in item:54233 7" }
 	cron_global = {
 		"* 0 * * * /happy",
 		"*/30 * * * * /cry",
 		"* 0,12 * * * /giggle",
 		"* * 1,15 * * /dance",
+		"0 * * * * /cheer"
 	}
 	wowCron.OnLoad()
 	wowCron.ADDON_LOADED()
@@ -39,7 +40,12 @@ function test.validValues( expected, actual )
 end
 function test.testADDON_LOADED_buildsEventsTable()
 	-- this should already be loaded
-	assertEquals( 0, wowCron.events["* * * * * /in item:54233 7"] )
+	size = 0
+	for k,v in pairs( wowCron.events ) do
+		size = size + 1
+	end
+	assertEquals( 6, size )
+	--assertEquals( 0, wowCron.events["* * * * * /in item:54233 7"] )
 end
 function test.testExpand_minute_all()
 	local expectedValues = {}
@@ -77,47 +83,158 @@ function test.testExpand_day_all()
 	local expandedDay = wowCron.Expand( "*", "day" )
 	test.validValues( expectedValues, expandedDay )
 end
-function test.testExpand_dow_all()
+function test.testExpand_wday_all()
 	local expectedValues = {}
-	for i = 0,7 do
+	for i = 1,8 do  -- adjusted for Lua's date wday (1 = Sunday)
 		expectedValues[i] = 1
 	end
-	local expandedDOW = wowCron.Expand( "*", "dow" )
-	test.validValues( expectedValues, expandedDOW )
+	local expandedWDAY = wowCron.Expand( "*", "wday" )
+	test.validValues( expectedValues, expandedWDAY )
 end
---[[
-
+function test.testParse()
+	vals = { wowCron.Parse("* * * * * cmd") }
+	assertEquals( "*", vals[1] )
+	assertEquals( "*", vals[2] )
+	assertEquals( "*", vals[3] )
+	assertEquals( "*", vals[4] )
+	assertEquals( "*", vals[5] )
+	assertEquals( "cmd", vals[6] )
+end
+function test.testExpand_hour_range()
+	local expectedValues = {}
+	for i = 0,12 do
+		expectedValues[i] = 1
+	end
+	local expandedHour = wowCron.Expand( "0-12", "hour" )
+	test.validValues( expectedValues, expandedHour )
+end
+function test.testExpand_hour_2values()
+	local expectedValues = {}
+	expectedValues[6] = 1
+	expectedValues[12] = 1
+	local expandedHour = wowCron.Expand( "6,12", "hour" )
+	test.validValues( expectedValues, expandedHour )
+end
+function test.testExpand_hour_3values()
+	local expectedValues = {}
+	expectedValues[6] = 1
+	expectedValues[12] = 1
+	expectedValues[18] = 1
+	local expandedHour = wowCron.Expand( "6,12,18", "hour" )
+	test.validValues( expectedValues, expandedHour )
+end
+function test.testExpand_hour_step()
+	local expectedValues = {}
+	expectedValues[0] = 1
+	expectedValues[6] = 1
+	expectedValues[12] = 1
+	expectedValues[18] = 1
+	local expandedHour = wowCron.Expand( "*/6", "hour" )
+	test.validValues( expectedValues, expandedHour )
+end
+function test.testExpand_hour_rangeWithStep()
+	local expectedValues = {}
+	expectedValues[0] = 1
+	expectedValues[6] = 1
+	expectedValues[12] = 1
+	expectedValues[18] = 1
+	local expandedHour = wowCron.Expand( "0-18/6", "hour" )
+	test.validValues( expectedValues, expandedHour )
+end
+function test.testExpand_hour_2values_rangeWStep()
+	local expectedValues = {}
+	expectedValues[0] = 1
+	expectedValues[3] = 1
+	expectedValues[6] = 1
+	expectedValues[12] = 1
+	expectedValues[18] = 1
+	local expandedHour = wowCron.Expand( "0-6/3,6-18/6", "hour" )
+	test.validValues( expectedValues, expandedHour )
+end
+function test.testExpand_hour_2values_wildWStep()
+	local expectedValues = {}
+	expectedValues[0] = 1
+	expectedValues[5] = 1
+	expectedValues[10] = 1
+	expectedValues[12] = 1
+	expectedValues[15] = 1
+	expectedValues[20] = 1
+	local expandedHour = wowCron.Expand( "*/12,*/5", "hour" )
+	test.validValues( expectedValues, expandedHour )
+end
+function test.testExpand_hour_outOfRange_single()
+	--expectedValues = {}
+	local expandedHour = wowCron.Expand( "25", "hour")
+	assertIsNil( expandedHour[25] )
+end
 function test.testRunNow_onMinute_yes()
 	local ts = 1401054240 -- Sunday 14:44
 	local run, cmd = wowCron.RunNow( "* * * * * /hello", ts )
 	assertTrue( run, "This should be true" )
-	assertEquals( cmd, "/hello" )
+end
+function test.testRunNow_returns_cmd()
+	local ts = 1401054240 -- Sunday 14:44
+	local run, cmd = wowCron.RunNow( "* * * * * /hello", ts )
+	assertEquals( "/hello", cmd )
+end
+function test.testRunNow_returns_cmdParameters()
+	local ts = 1401054240 -- Sunday 14:44
+	local run, cmd = wowCron.RunNow( "* * * * * /say Hello", ts )
+	assertEquals( "/say Hello", cmd )
 end
 function test.testRunNow_onMinute5_yes()
 	local ts = 1401055500  -- Sunday 15:05
-	print( time() )
-	print( time() % 60 )
 	local run, cmd = wowCron.RunNow( "*/5 * * * * /hello", ts )
 	assertTrue( run, "This should be true" )
-	assertEquals( cmd, "/hello" )
+end
+function test.testRunNow_onMinute5_no()
+	local ts = 1401054240  -- Sunday 14:44
+	local run, cmd = wowCron.RunNow( "*/5 * * * * /hello", ts )
+	assertIsNil( run, "This should be nil" )
+end
+function test.testRunNow_onSunday_yes()
+	local ts = 1401054240  -- Sunday 14:44
+	local run, cmd = wowCron.RunNow( "* * * * 0 /hello", ts )
+	assertTrue( run, "This should be true" )
+end
+function test.testRunNow_onSunday_no()
+	local ts = 1401054240  -- Sunday 14:44
+	local run, cmd = wowCron.RunNow( "* * * * 1-6 /hello", ts )
+	assertIsNil( run, "This should be nil" )
+end
+function test.testRunNow_noCmd()
+	local ts = 1401054240 -- Sunday 14:44
+	local run, cmd = wowCron.RunNow( "* * * * *", ts )
+	assertEquals( "", cmd )
+end
+function test.testCmd_global_flag()
+	wowCron.Command("global")
+	assertTrue( wowCron.global )
+end
+function test.testCmd_global_list()
+	wowCron.Command("global list")
+end
+function test.testCmd_player_list()
+	wowCron.Command("list")
+end
+function test.testCmd_global_rm()
+	wowCron.Command("global rm 1")
+	assertEquals( "*/30 * * * * /cry", cron_global[1] )
+end
+function test.testCmd_player_rm()
+	wowCron.Command("rm 1")
+	assertEquals( 0, #cron_player )
+end
+function test.testCmd_global_add()
+	wowCron.Command("global * * * * * /cron list")
+	assertEquals( "* * * * * /cron list", cron_global[6] )
+end
+function test.testCmd_player_add()
+	wowCron.Command("* * * * * /cron list")
+	assertEquals( "* * * * * /cron list", cron_player[2] )
 end
 
-]]
---[[
 
-function test.testParseSets_nextEvent()
-	wowCron.Command( "* * * * * /openfire" )
-	assertEquals( nextMin, wowCron.nextEvent, "nextEvent should be the TS of the next top of the minute")
-end
-function test.testParseSets_events_event()
-	wowCron.Command( "* * * * * /openfire" )
-	assertEquals( "/openfire", wowCron.events[nextMin][1].event, "The event field should be set")
-end
-function test.testParseSets_events_fullEvent()
-	wowCron.Command( "* * * * * /openfire" )
-	assertEquals( "* * * * * /openfire", wowCron.events[nextMin][1].fullEvent )
-end
 
-]]
 
 test.run()
