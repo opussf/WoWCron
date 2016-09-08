@@ -20,6 +20,7 @@ wowCron = {}
 cron_global = {}
 cron_player = {}
 cron_knownSlashCmds = {}
+cron_knownEmotes = {}
 wowCron.events = {}  -- [nextTS] = {[1]={['event'] = 'runME', ['fullEvent'] = '* * * * * runMe'}}
 -- meh, ['fullEvent'] = ts
 -- meh, meh...  [1] = '* * * * * runMe', [2] = "* * * * * other"
@@ -47,24 +48,16 @@ function wowCron.OnUpdate()
 	local now = date( "*t", nowTS )
 	if (wowCron.lastUpdated < nowTS) and (now.sec == 0) then
 		wowCron.lastUpdated = nowTS
-		wowCron.Print("On the minute. "..(nowTS % 60))
+		wowCron.Print(date("%H:%M"))
 		for _,cron in pairs( wowCron.events ) do
 			runNow, cmd = wowCron.RunNow( cron )
 			if runNow then
 				slash, parameters = wowCron.DeconstructCmd( cmd )
-				print("do now: "..cmd.." -->"..slash)
+				print("do now: "..cmd.." -->"..slash.." "..parameters)
 				-- find the function to call based on the slashcommand
-				for k,v in pairs( cron_knownSlashCmds ) do
-					if string.lower(slash) == string.lower(k) then
-						--print(k.." is of type:"..type(v))
-						-- call the function
-						v( parameters )
-						break
-					end
-				end
-
+				isGood = wowCron.CallAddon( slash, parameters ) or
+						wowCron.CallEmote( slash, parameters )
 			end
-
 		end
 		if (now.min == 0) then
 			wowCron.Print("On the hour")
@@ -86,11 +79,34 @@ function wowCron.PLAYER_ENTERING_WORLD()
 end
 
 -- Support Code
+function wowCron.CallAddon( slash, parameters )
+	-- loop through cron_knownSlashCmds (for other loaded addons)
+	-- return true if could handle the slash command
+	for k,v in pairs( cron_knownSlashCmds ) do
+		if string.lower( slash ) == string.lower( k ) then
+			--call the function
+			v( parameters )
+			return true
+		end
+	end
+end
+function wowCron.CallEmote( slash, parameters )
+	-- look for emote in cron_knownEmotes for emotes to call
+	-- return true if could handle the slash command
+	token = string.upper(strsub( slash, -(strlen( slash )-1) ))
+	print(token)
+	for _,v in pairs( cron_knownEmotes ) do
+		if token == v then
+			DoEmote(token)
+			return true
+		end
+	end
+end
 function wowCron.BuildSlashCommands()
 	local count = 0
 	for k,v in pairs(SlashCmdList) do
 		count = count + 1
-		wowCron.Print(string.format("% 2i : %s :: %s", count, k, type(v)))
+		--wowCron.Print(string.format("% 2i : %s :: %s", count, k, type(v)))
 		cron_knownSlashCmds[k] = v
 		lcv = 1
 		while true do
@@ -102,6 +118,10 @@ function wowCron.BuildSlashCommands()
 			if lcv >= 10 then break end
 			lcv = lcv + 1
 		end
+	end
+	--print(MAXEMOTEINDEX)
+	for i = 1,1000 do
+		cron_knownEmotes[i] = _G["EMOTE"..i.."_TOKEN"]
 	end
 end
 function wowCron.RunNow( cmdIn, ts )
