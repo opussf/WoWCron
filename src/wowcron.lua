@@ -3,7 +3,6 @@ WOWCRON_MSG_VERSION   = GetAddOnMetadata(INEED_MSG_ADDONNAME,"Version");
 WOWCRON_MSG_AUTHOR    = "opussf";
 
 -- Colours
---[[
 COLOR_RED = "|cffff0000";
 COLOR_GREEN = "|cff00ff00";
 COLOR_BLUE = "|cff0000ff";
@@ -14,12 +13,12 @@ COLOR_GREY = "|cff808080";
 COLOR_GOLD = "|cffcfb52b";
 COLOR_NEON_BLUE = "|cff4d4dff";
 COLOR_END = "|r";
-]]
 
 wowCron = {}
 cron_global = {}
 cron_player = {}
 cron_knownSlashCmds = {}
+cron_knownEmotes = {}
 wowCron.events = {}  -- [nextTS] = {[1]={['event'] = 'runME', ['fullEvent'] = '* * * * * runMe'}}
 -- meh, ['fullEvent'] = ts
 -- meh, meh...  [1] = '* * * * * runMe', [2] = "* * * * * other"
@@ -47,23 +46,19 @@ function wowCron.OnUpdate()
 	local now = date( "*t", nowTS )
 	if (wowCron.lastUpdated < nowTS) and (now.sec == 0) then
 		wowCron.lastUpdated = nowTS
-		wowCron.Print("On the minute. "..(nowTS % 60))
+		wowCron.Print(date("%H:%M"))
 		for _,cron in pairs( wowCron.events ) do
 			runNow, cmd = wowCron.RunNow( cron )
 			if runNow then
 				slash, parameters = wowCron.DeconstructCmd( cmd )
-				print("do now: "..cmd.." -->"..slash)
+				print("do now: "..cmd.." -->"..slash.." "..parameters)
 				-- find the function to call based on the slashcommand
-				for k,v in pairs( cron_knownSlashCmds ) do
-					if slash == k then
-						-- call the function
-						cron_knownSlashCmds[v]( parameters )
-						break
-					end
+				isGood = false
+				for _,func in ipairs(wowCron.actionsList) do
+					isGood = isGood or func( slash, parameters )
+					if isGood then break end
 				end
-
 			end
-
 		end
 		if (now.min == 0) then
 			wowCron.Print("On the hour")
@@ -85,11 +80,47 @@ function wowCron.PLAYER_ENTERING_WORLD()
 end
 
 -- Support Code
+wowCron.actionsList = {}
+function wowCron.CallAddon( slash, parameters )
+	-- loop through cron_knownSlashCmds (for other loaded addons)
+	-- return true if could handle the slash command
+	for k,v in pairs( cron_knownSlashCmds ) do
+		if string.lower( slash ) == string.lower( k ) then
+			--call the function
+			v( parameters )
+			return true
+		end
+	end
+end
+wowCron.actionsList[1] = wowCron.CallAddon
+function wowCron.CallEmote( slash, parameters )
+	-- look for emote in cron_knownEmotes for emotes to call
+	-- return true if could handle the slash command
+	token = string.upper(strsub( slash, -(strlen( slash )-1) ))
+	for _,v in pairs( cron_knownEmotes ) do
+		if token == v then
+			DoEmote(token)
+			return true
+		end
+	end
+end
+wowCron.actionsList[2] = wowCron.CallEmote
+function wowCron.RunScript( slash, parameters )
+	slash = string.lower( slash )
+	print("RunScript( "..slash..", "..parameters.." )")
+	if slash == "/run" or slash == "/script" then
+		print("Calling "..parameters)
+		loadstring(parameters)()
+		return true
+	end
+end
+wowCron.actionsList[3] = wowCron.RunScript
+
 function wowCron.BuildSlashCommands()
 	local count = 0
 	for k,v in pairs(SlashCmdList) do
 		count = count + 1
-		--wowCron.Print(string.format("% 2i : %s", count, k))
+		--wowCron.Print(string.format("% 2i : %s :: %s", count, k, type(v)))
 		cron_knownSlashCmds[k] = v
 		lcv = 1
 		while true do
@@ -97,10 +128,14 @@ function wowCron.BuildSlashCommands()
 			gggg = _G[ teststr ]
 			if not gggg then break end
 			--print("_G["..teststr.."] = "..gggg)
-			cron_knownSlashCmds[gggg] = k
+			cron_knownSlashCmds[gggg] = v
 			if lcv >= 10 then break end
 			lcv = lcv + 1
 		end
+	end
+	--print(MAXEMOTEINDEX)
+	for i = 1,1000 do
+		cron_knownEmotes[i] = _G["EMOTE"..i.."_TOKEN"]
 	end
 end
 function wowCron.RunNow( cmdIn, ts )
@@ -189,7 +224,6 @@ function wowCron.Parse( cron )
 end
 
 function wowCron.DeconstructCmd( cmdIn )
-	cmdIn = string.lower( cmdIn )
 	local a,b,c = strfind( cmdIn, "(%S+)" )
 	if a then
 		return c, strsub( cmdIn, b+2 )
@@ -197,34 +231,64 @@ function wowCron.DeconstructCmd( cmdIn )
 		return ""
 	end
 end
---[[
-function wowCron.CalculatePossibleValues( field, inValue )
-	local minValue
-end
-]]
-
---[[
-if msg then
-		local i,c = strmatch(msg, "^(|c.*|r)%s*(%d*)$")
-		if i then  -- i is an item, c is a count or nil
-			return i, c
-		else  -- Not a valid item link
-			msg = string.lower(msg)
-			local a,b,c = strfind(msg, "(%S+)")  --contiguous string of non-space characters
-			if a then
-				-- c is the matched string, strsub is everything after that, skipping the space
-				return c, strsub(msg, b+2)
-			else
-				return ""
-			end
-		end
+function wowCron.PrintHelp()
+	wowCron.Print("")
+	for cmd, info in pairs(wowCron.CommandList) do
+		wowCron.Print(string.format("%s %s %s -> %s",
+			SLASH_CRON1, cmd, info.help[1], info.help[2]))
 	end
 end
-]]
-
-
-function wowCron.Command( msg )
-	wowCron.Parse( msg )
+function wowCron.List()
+	cronTable = wowCron.global and cron_global or cron_player
+	for i,entry in ipairs(cronTable) do
+		wowCron.Print( string.format("[% 3i] %s", i, entry) )
+	end
+end
+function wowCron.Remove( index )
+	cronTable = wowCron.global and cron_global or cron_player
+	index = tonumber(index)
+	if index and index>0 and index<=#cronTable then
+		local entry = table.remove( cronTable, index )
+		wowCron.Print( COLOR_RED.."REMOVING: "..COLOR_END..entry )
+	end
+end
+function wowCron.AddEntry( entry )
+	cronTable = wowCron.global and cron_global or cron_player
+	table.insert( cronTable, entry )
+	wowCron.Print( string.format("Added to %s: %s", (wowCron.global and "global" or "personal"), entry ) )
+end
+wowCron.CommandList = {
+	["help"] = {
+		["func"] = wowCron.PrintHelp,
+		["help"] = {"","Print this help."},
+	},
+	["global"] = {
+		["func"] = function( msg ) wowCron.Command( msg, true ); end,
+		["help"] = {"<commands>", "Sets global flag"},
+	},
+	["list"] = {
+		["func"] = wowCron.List,
+		["help"] = {"", "List cron entries."}
+	},
+	["rm"] = {
+		["func"] = wowCron.Remove,
+		["help"] = {"index", "Remove index entry."}
+	},
+	["add"] = {
+		["func"] = wowCron.AddEntry,
+		["help"] = {"<entry>", "Adds an entry. Default action."}
+	},
+}
+function wowCron.Command( msg, isGlobal )
+	wowCron.global = isGlobal
+	cmd, parameters = wowCron.DeconstructCmd( msg )
+	cmd = string.lower(cmd)
+	local cmdFunc = wowCron.CommandList[cmd]
+	if cmdFunc then
+		cmdFunc.func( parameters )
+	else
+		wowCron.AddEntry( msg )
+	end
 end
 function wowCron.Print( msg, showName)
 	-- print to the chat frame
