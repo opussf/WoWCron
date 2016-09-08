@@ -184,15 +184,11 @@ function test.testRunNow_returns_cmdParameters()
 end
 function test.testRunNow_onMinute5_yes()
 	local ts = 1401055500  -- Sunday 15:05
-	--print( time() )
-	--print( time() % 60 )
 	local run, cmd = wowCron.RunNow( "*/5 * * * * /hello", ts )
 	assertTrue( run, "This should be true" )
 end
 function test.testRunNow_onMinute5_no()
 	local ts = 1401054240  -- Sunday 14:44
-	--print( time() )
-	--print( time() % 60 )
 	local run, cmd = wowCron.RunNow( "*/5 * * * * /hello", ts )
 	assertIsNil( run, "This should be nil" )
 end
@@ -205,6 +201,11 @@ function test.testRunNow_onSunday_no()
 	local ts = 1401054240  -- Sunday 14:44
 	local run, cmd = wowCron.RunNow( "* * * * 1-6 /hello", ts )
 	assertIsNil( run, "This should be nil" )
+end
+function test.testRunNow_noCmd()
+	local ts = 1401054240 -- Sunday 14:44
+	local run, cmd = wowCron.RunNow( "* * * * *", ts )
+	assertEquals( "", cmd )
 end
 function test.testCmd_global_flag()
 	wowCron.Command("global")
@@ -222,7 +223,6 @@ function test.testCmd_global_rm()
 end
 function test.testCmd_player_rm()
 	wowCron.Command("rm 1")
-	print(wowCron.global or "nil")
 	assertEquals( 0, #cron_player )
 end
 function test.testCmd_global_add()

@@ -121,6 +121,7 @@ strmatch = string.match
 strfind = string.find
 strsub = string.sub
 strtolower = string.lower
+strlen = string.len
 time = os.time
 date = os.date
 max = math.max

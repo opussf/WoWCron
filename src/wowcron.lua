@@ -232,7 +232,9 @@ function wowCron.DeconstructCmd( cmdIn )
 	end
 end
 function wowCron.PrintHelp()
-	wowCron.Print("")
+	wowCron.Print("Creates a crontab for WoW.")
+	wowCron.Print("Used standard Cron format (min hour day month wday cmd).")
+	wowCron.Print("cmd can be any currently installed addon slash command, an emote, or '/run <lua code>'.")
 	for cmd, info in pairs(wowCron.CommandList) do
 		wowCron.Print(string.format("%s %s %s -> %s",
 			SLASH_CRON1, cmd, info.help[1], info.help[2]))
@@ -254,9 +256,13 @@ function wowCron.Remove( index )
 	end
 end
 function wowCron.AddEntry( entry )
-	cronTable = wowCron.global and cron_global or cron_player
-	table.insert( cronTable, entry )
-	wowCron.Print( string.format("Added to %s: %s", (wowCron.global and "global" or "personal"), entry ) )
+	if strlen( entry ) >= 9 then -- VERY mimimum size of a cron is 9 char (5x * and 4 spaces)
+		cronTable = wowCron.global and cron_global or cron_player
+		table.insert( cronTable, entry )
+		wowCron.Print( string.format("Added to %s: %s", (wowCron.global and "global" or "personal"), entry ) )
+	else
+		wowCron.PrintHelp()
+	end
 end
 wowCron.CommandList = {
 	["help"] = {
