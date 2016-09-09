@@ -25,6 +25,7 @@ function test.before()
 	}
 	wowCron.OnLoad()
 	wowCron.ADDON_LOADED()
+	wowCron.PLAYER_ENTERING_WORLD()
 	nextMin = wowCron.lastUpdated+(60-(wowCron.lastUpdated%60))  -- compute the TS of the next top of the minute
 end
 function test.after()
