@@ -59,7 +59,7 @@ function wowCron.OnUpdate()
 			runNow, cmd = wowCron.RunNow( cron )
 			if runNow then
 				slash, parameters = wowCron.DeconstructCmd( cmd )
-				print("do now: "..cmd.." -->"..slash.." "..parameters)
+				print("do now: "..slash.." "..parameters)
 				-- find the function to call based on the slashcommand
 				isGood = false
 				for _,func in ipairs(wowCron.actionsList) do
