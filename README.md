@@ -49,7 +49,7 @@ The allowed commands can be any of the following:
 * Some basic chat commands.  ```/say```, ```/guild``` or ```/yell``` are currently supported.
 * Running some Lua code directly.  Use ```/run``` or ```/script``` as the start of the command to identify code to run.
 
-### Examples
+### Cron Examples
 
 * ```0,15,30,45 * * * * /train``` does the train macro on the quarter hour marks.
 * ```*/2 * * * * /run SortBags()``` calls the SortBags() function every 2 minutes.
@@ -59,5 +59,23 @@ The allowed commands can be any of the following:
 ### Commands
 
 To keep it simple, there are only a few commands.
-All commands work on the current character's crontab.
-Adding the ```global``` keyword before the command
+All commands work on the current character's crontab by default.
+Adding the ```global``` keyword before the command allows one to work with the global crontab.
+
+Commands:
+* [global] <cron line> - adds a cron line
+* [global] add <cron line> - explict call to add a cron line
+* [global] list - lists the lines in the crontab
+* [global] rm <index> - removes the <index> line from the crontab
+* help - shows a help section.
+
+## Notes
+
+This is still a new addon.
+There are still some debug items in the code.
+Printing the time on the minute, and showing what it is running.
+Feel free to comment out those lines in the code if you don't like them.
+
+I'm also thinking of spending some time with creating a UI for this.
+The UI addition would change the command line, and would probably double the size of the addon.
+
