@@ -258,6 +258,18 @@ function test.testRunNow_minHourDayMonth_no()
 	local run, cmd = wowCron.RunNow( "2 0 25 5 * /hello it is 00:02 May 25.", ts )
 	assertIsNil( run, "This should not run" )
 end
+function test.testBuildFirstCronMacro_expands()
+	wowCron.started = time({["year"] = 2016, ["month"] = 5, ["day"] = 25, ["hour"] = 0, ["min"] = 0, ["sec"] = 0})
+	cron = wowCron.BuildFirstCronMacro()
+	assertEquals( "1 0 25 5 *", cron )
+end
+function test.testBuildFirstCronMacro_added()
+	found = false
+	for k,v in pairs(wowCron.macros) do
+		found = found or (k == "@first")
+	end
+	assertTrue( found, "@first should be auto generated and added to the macro list." )
+end
 function test.testCmd_global_flag()
 	wowCron.Command("global")
 	assertTrue( wowCron.global )

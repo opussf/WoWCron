@@ -78,7 +78,7 @@ function wowCron.ADDON_LOADED()
 	wowCron.lastUpdated = time()
 	wowCron.ParseAll()
 	wowCron.BuildSlashCommands()
-	--INEED.OptionsPanel_Reset();
+	wowCron.macros["@first"] = wowCron.BuildFirstCronMacro()
 	--wowCron.Print("Loaded")
 end
 function wowCron.PLAYER_ENTERING_WORLD()
@@ -86,6 +86,12 @@ function wowCron.PLAYER_ENTERING_WORLD()
 	wowCron.BuildSlashCommands()
 end
 -- Support Code
+function wowCron.BuildFirstCronMacro()
+	-- returns a specific cron for the next minute based on wowCron.started
+	local tt = date( "*t", wowCron.started + 60 )
+	return (string.format("%s %s %s %s *", tt.min, tt.hour, tt.day, tt.month))
+
+end
 -- Begin Handle commands
 wowCron.actionsList = {}
 function wowCron.CallAddon( slash, parameters )
@@ -164,12 +170,8 @@ function wowCron.RunNow( cmdIn, ts )
 
 	-- do the macro expansion here, since I want to return true for @first if within the first ~60 seconds of being run.
 	local macro, cmd = strmatch( cmdIn, "^(@%S+)%s+(.*)$" )
-	if macro then
-		if (string.lower(macro) == "@first") and ((time() - wowCron.started) <= 75) then  -- @first and first run, return true
-			return true, cmd
-		elseif wowCron.macros[macro] then -- not @first, but is in the list of macros, expand the macro
-			cmdIn = wowCron.macros[macro].." "..cmd
-		end -- invalid cron should be found later
+	if macro and wowCron.macros[macro] then -- expand the macro
+		cmdIn = wowCron.macros[macro].." "..cmd
 	end
 
 	-- put all six values into parsed table
