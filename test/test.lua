@@ -241,6 +241,27 @@ function test.testRunNow_macro_firstminute_doesNotRun()
 	local run, cmd = wowCron.RunNow( "@first /hello" )
 	assertIsNil( run, "This should be nil" )
 end
+function test.testRunNow_day_yes()
+	local ts = time({["year"] = 2016, ["month"] = 5, ["day"] = 25, ["hour"] = 0, ["min"] = 0, ["sec"] = 0})
+	local run, cmd = wowCron.RunNow( "* * 25 * * /hello it is the 25th", ts )
+	assertTrue( run, "This should be true" )
+end
+function test.testRunNow_day_no()
+	local ts = time({["year"] = 2016, ["month"] = 5, ["day"] = 25, ["hour"] = 0, ["min"] = 0, ["sec"] = 0})
+	local run, cmd = wowCron.RunNow( "* * 5 * * /hello it is the 5th", ts )
+	assertIsNil( run, "This should not run" )
+end
+function test.testRunNow_month_yes()
+	local ts = time({["year"] = 2016, ["month"] = 5, ["day"] = 25, ["hour"] = 0, ["min"] = 0, ["sec"] = 0})
+	local run, cmd = wowCron.RunNow( "* * * 5 * /hello it is May.", ts )
+	assertTrue( run, "This should be true" )
+end
+function test.testRunNow_month_no()
+	local ts = time({["year"] = 2016, ["month"] = 5, ["day"] = 25, ["hour"] = 0, ["min"] = 0, ["sec"] = 0})
+	local run, cmd = wowCron.RunNow( "* * 6 * * /hello it is June.", ts )
+	assertIsNil( run, "This should not run" )
+end
+
 function test.testCmd_global_flag()
 	wowCron.Command("global")
 	assertTrue( wowCron.global )
