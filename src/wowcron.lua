@@ -74,16 +74,17 @@ end
 function wowCron.ADDON_LOADED()
 	-- Unregister the event for this method.
 	wowCron_Frame:UnregisterEvent("ADDON_LOADED")
-	wowCron.started = time()
 	wowCron.lastUpdated = time()
 	wowCron.ParseAll()
 	wowCron.BuildSlashCommands()
-	wowCron.macros["@first"] = wowCron.BuildFirstCronMacro()
 	--wowCron.Print("Loaded")
 end
 function wowCron.PLAYER_ENTERING_WORLD()
+	-- since this only gets called once, the can be where the @first macro is created.
 	wowCron_Frame:UnregisterEvent("PLAYER_ENTERING_WORLD")
 	wowCron.BuildSlashCommands()
+	wowCron.started = time()
+	wowCron.macros["@first"] = wowCron.BuildFirstCronMacro()
 end
 -- Support Code
 function wowCron.BuildFirstCronMacro()
