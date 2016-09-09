@@ -40,7 +40,6 @@ wowCron.chatChannels = {
 	["/say"] = "SAY",
 	["/g"] = "GUILD",
 }
-
 -- events
 function wowCron.OnLoad()
 	SLASH_CRON1 = "/CRON"
@@ -88,8 +87,8 @@ function wowCron.PLAYER_ENTERING_WORLD()
 	wowCron_Frame:UnregisterEvent("PLAYER_ENTERING_WORLD")
 	wowCron.BuildSlashCommands()
 end
-
 -- Support Code
+-- Begin Handle commands
 wowCron.actionsList = {}
 function wowCron.CallAddon( slash, parameters )
 	-- loop through cron_knownSlashCmds (for other loaded addons)
@@ -136,7 +135,7 @@ function wowCron.RunScript( slash, parameters )
 	end
 end
 tinsert( wowCron.actionsList, wowCron.RunScript )
-
+-- End Handle commands
 function wowCron.BuildSlashCommands()
 	local count = 0
 	for k,v in pairs(SlashCmdList) do
@@ -168,7 +167,7 @@ function wowCron.RunNow( cmdIn, ts )
 	-- do the macro expansion here, since I want to return true for @first if within the first ~60 seconds of being run.
 	local macro, cmd = strmatch( cmdIn, "^(@%S+)%s+(.*)$" )
 	if macro then
-		if string.lower(macro) == "@first" and (time() - wowCron.started) <= 60 then  -- @first and first run, return true
+		if string.lower(macro) == "@first" and (time() - wowCron.started) <= 62 then  -- @first and first run, return true
 			return true, cmd
 		elseif wowCron.macros[macro] then -- not @first, but is in the list of macros, expand the macro
 			cmdIn = wowCron.macros[macro].." "..cmd
@@ -237,7 +236,6 @@ function wowCron.Expand( value, type )
 	end
 	return out
 end
-
 function wowCron.ParseAll()
 	-- Only when starting, or changing
 	wowCron.events = {}
@@ -249,7 +247,6 @@ function wowCron.ParseAll()
 	for _, cmd in ipairs(cron_global) do
 		tinsert( wowCron.events, cmd )
 	end
-
 end
 function wowCron.Parse( cron )
 	-- takes the cron string and returns the 5 cron patterns, and the command
@@ -260,7 +257,6 @@ function wowCron.Parse( cron )
 			strmatch( cron,	"^(%S+)%s+(%S+)%s+(%S+)%s+(%S+)%s+(%S+)%s+(.*)$" )
 	return min, hour, day, month, wday, cmd
 end
-
 function wowCron.DeconstructCmd( cmdIn )
 	local a,b,c = strfind( cmdIn, "(%S+)" )
 	if a then
@@ -345,4 +341,3 @@ function wowCron.Print( msg, showName)
 	end
 	DEFAULT_CHAT_FRAME:AddMessage( msg )
 end
-
