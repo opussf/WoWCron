@@ -262,8 +262,18 @@ function test.testCmd_player_add()
 	wowCron.Command("* * * * * /cron list")
 	assertEquals( "* * * * * /cron list", cron_player[2] )
 end
-
-
+function test.testChatMsg_s()
+	local ts = 1401054240  -- Sunday 14:44
+	assertTrue( wowCron.SendMessage( "/s", "Hello all." ) )
+end
+function test.testChatMsg_say()
+	local ts = 1401054240  -- Sunday 14:44
+	assertTrue( wowCron.SendMessage( "/SAY", "Hello all." ) )
+end
+function test.testChatMsg_g()
+	local ts = 1401054240  -- Sunday 14:44
+	assertTrue( wowCron.SendMessage( "/G", "Hello all." ) )
+end
 
 
 test.run()

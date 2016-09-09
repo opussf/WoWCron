@@ -35,6 +35,11 @@ wowCron.macros = {
 	["@hourly"]   = "0 * * * *",
 	["@midnight"] = "0 0 * * *",
 }
+wowCron.chatChannels = {
+	["/s"] = "SAY",
+	["/say"] = "SAY",
+	["/g"] = "GUILD",
+}
 
 -- events
 function wowCron.OnLoad()
@@ -97,7 +102,7 @@ function wowCron.CallAddon( slash, parameters )
 		end
 	end
 end
-wowCron.actionsList[1] = wowCron.CallAddon
+tinsert( wowCron.actionsList, wowCron.CallAddon )
 function wowCron.CallEmote( slash, parameters )
 	-- look for emote in cron_knownEmotes for emotes to call
 	-- return true if could handle the slash command
@@ -109,7 +114,18 @@ function wowCron.CallEmote( slash, parameters )
 		end
 	end
 end
-wowCron.actionsList[2] = wowCron.CallEmote
+tinsert( wowCron.actionsList, wowCron.CallEmote )
+function wowCron.SendMessage( slash, parameters )
+	slash = string.lower(slash)
+	-- look for the standard chat commands and send the contents of parameters to the corrisponding channel
+	for cmd, channel in pairs( wowCron.chatChannels ) do
+		if slash == cmd then
+			SendChatMessage( parameters, channel, nil, nil )
+			return true
+		end
+	end
+end
+tinsert( wowCron.actionsList, wowCron.SendMessage )
 function wowCron.RunScript( slash, parameters )
 	slash = string.lower( slash )
 	--print("RunScript( "..slash..", "..parameters.." )")
@@ -119,7 +135,7 @@ function wowCron.RunScript( slash, parameters )
 		return true
 	end
 end
-wowCron.actionsList[3] = wowCron.RunScript
+tinsert( wowCron.actionsList, wowCron.RunScript )
 
 function wowCron.BuildSlashCommands()
 	local count = 0
@@ -225,13 +241,15 @@ end
 function wowCron.ParseAll()
 	-- Only when starting, or changing
 	wowCron.events = {}
-	for _, cmd in ipairs(cron_global) do
-		tinsert( wowCron.events, cmd )
-	end
 	-- player specific events
 	for _, cmd in ipairs(cron_player) do
 		tinsert( wowCron.events, cmd )
 	end
+	-- global events
+	for _, cmd in ipairs(cron_global) do
+		tinsert( wowCron.events, cmd )
+	end
+
 end
 function wowCron.Parse( cron )
 	-- takes the cron string and returns the 5 cron patterns, and the command
@@ -274,6 +292,7 @@ function wowCron.Remove( index )
 		local entry = table.remove( cronTable, index )
 		wowCron.Print( COLOR_RED.."REMOVING: "..COLOR_END..entry )
 	end
+	wowCron.ParseAll()
 end
 function wowCron.AddEntry( entry )
 	if strlen( entry ) >= 9 then -- VERY mimimum size of a cron is 9 char (5x * and 4 spaces)
@@ -283,6 +302,7 @@ function wowCron.AddEntry( entry )
 	else
 		wowCron.PrintHelp()
 	end
+	wowCron.ParseAll()
 end
 wowCron.CommandList = {
 	["help"] = {
