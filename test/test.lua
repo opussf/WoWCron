@@ -228,18 +228,47 @@ function test.testRunNow_explicit_midnight()
 	local run, cmd = wowCron.RunNow( "0 0 * * * /hello it is 0 0", ts )
 	assertTrue( run, "This should be true" )
 end
-function test.testRunNow_macro_firstminute_runs()
-	local run, cmd = wowCron.RunNow( "@first /hello" )
+function test.testRunNow_day_yes()
+	local ts = time({["year"] = 2016, ["month"] = 5, ["day"] = 25, ["hour"] = 0, ["min"] = 0, ["sec"] = 0})
+	local run, cmd = wowCron.RunNow( "* * 25 * * /hello it is the 25th", ts )
 	assertTrue( run, "This should be true" )
 end
-function test.testRunNow_macro_firstminute_runs_upper()
-	local run, cmd = wowCron.RunNow( "@FIRST /hello" )
+function test.testRunNow_day_no()
+	local ts = time({["year"] = 2016, ["month"] = 5, ["day"] = 25, ["hour"] = 0, ["min"] = 0, ["sec"] = 0})
+	local run, cmd = wowCron.RunNow( "* * 5 * * /hello it is the 5th", ts )
+	assertIsNil( run, "This should not run" )
+end
+function test.testRunNow_month_yes()
+	local ts = time({["year"] = 2016, ["month"] = 5, ["day"] = 25, ["hour"] = 0, ["min"] = 0, ["sec"] = 0})
+	local run, cmd = wowCron.RunNow( "* * * 5 * /hello it is May.", ts )
 	assertTrue( run, "This should be true" )
 end
-function test.testRunNow_macro_firstminute_doesNotRun()
-	wowCron.started = 1401001200 -- started a LONG time ago
-	local run, cmd = wowCron.RunNow( "@first /hello" )
-	assertIsNil( run, "This should be nil" )
+function test.testRunNow_month_no()
+	local ts = time({["year"] = 2016, ["month"] = 5, ["day"] = 25, ["hour"] = 0, ["min"] = 0, ["sec"] = 0})
+	local run, cmd = wowCron.RunNow( "* * * 6 * /hello it is June.", ts )
+	assertIsNil( run, "This should not run" )
+end
+function test.testRunNow_minHourDayMonth_yes()
+	ts = time({["year"] = 2016, ["month"] = 5, ["day"] = 25, ["hour"] = 0, ["min"] = 1, ["sec"] = 0})
+	local run, cmd = wowCron.RunNow( "1 0 25 5 * /hello it is 00:01 May 25.", ts )
+	assertTrue( run, "This should be true" )
+end
+function test.testRunNow_minHourDayMonth_no()
+	ts = time({["year"] = 2016, ["month"] = 5, ["day"] = 25, ["hour"] = 0, ["min"] = 1, ["sec"] = 0})
+	local run, cmd = wowCron.RunNow( "2 0 25 5 * /hello it is 00:02 May 25.", ts )
+	assertIsNil( run, "This should not run" )
+end
+function test.testBuildFirstCronMacro_expands()
+	wowCron.started = time({["year"] = 2016, ["month"] = 5, ["day"] = 25, ["hour"] = 0, ["min"] = 0, ["sec"] = 0})
+	cron = wowCron.BuildFirstCronMacro()
+	assertEquals( "1 0 25 5 *", cron )
+end
+function test.testBuildFirstCronMacro_added()
+	found = false
+	for k,v in pairs(wowCron.macros) do
+		found = found or (k == "@first")
+	end
+	assertTrue( found, "@first should be auto generated and added to the macro list." )
 end
 function test.testCmd_global_flag()
 	wowCron.Command("global")
