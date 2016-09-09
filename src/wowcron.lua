@@ -39,6 +39,7 @@ wowCron.chatChannels = {
 	["/s"]    = "SAY",
 	["/say"]  = "SAY",
 	["/g"]    = "GUILD",
+	["/guild"]= "GUILD",
 	["/y"]    = "YELL",
 	["/yell"] = "YELL",
 }
