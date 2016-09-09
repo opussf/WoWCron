@@ -27,3 +27,15 @@ wowCron.events[TS] is a list of events to run
 ----
 
 /console scriptErrors 1
+
+----
+
+
+"@reboot"  : '',  # is this valid for this class?
+"@hourly"  : '0 * * * *',
+"@daily"   : '0 0 * * *',
+"@midnight": '0 0 * * *',
+"@weekly"  : '0 0 * * 0',
+"@monthly" : '0 0 1 * *',
+"@yearly"  : '0 0 1 1 *',
+"@annually": '0 0 1 1 *',
