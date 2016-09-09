@@ -31,15 +31,24 @@ wowCron.ranges = {
 	["wday"]  = {0,7}, -- 0 and 7 is sunday
 }
 wowCron.fieldNames = { "min", "hour", "month", "day", "wday" }
-
+wowCron.macros = {
+	["@hourly"]   = "0 * * * *",
+	["@midnight"] = "0 0 * * *",
+}
+wowCron.chatChannels = {
+	["/s"]    = "SAY",
+	["/say"]  = "SAY",
+	["/g"]    = "GUILD",
+	["/guild"]= "GUILD",
+	["/y"]    = "YELL",
+	["/yell"] = "YELL",
+}
 -- events
 function wowCron.OnLoad()
 	SLASH_CRON1 = "/CRON"
 	SlashCmdList["CRON"] = function(msg) wowCron.Command(msg); end
-
 	wowCron_Frame:RegisterEvent("ADDON_LOADED")
 	wowCron_Frame:RegisterEvent("PLAYER_ENTERING_WORLD")
-	wowCron.lastUpdated = time()
 end
 function wowCron.OnUpdate()
 	nowTS = time()
@@ -51,7 +60,7 @@ function wowCron.OnUpdate()
 			runNow, cmd = wowCron.RunNow( cron )
 			if runNow then
 				slash, parameters = wowCron.DeconstructCmd( cmd )
-				print("do now: "..cmd.." -->"..slash.." "..parameters)
+				print("do now: "..slash.." "..parameters)
 				-- find the function to call based on the slashcommand
 				isGood = false
 				for _,func in ipairs(wowCron.actionsList) do
@@ -60,15 +69,13 @@ function wowCron.OnUpdate()
 				end
 			end
 		end
-		if (now.min == 0) then
-			wowCron.Print("On the hour")
-		end
 	end
 end
 function wowCron.ADDON_LOADED()
 	-- Unregister the event for this method.
 	wowCron_Frame:UnregisterEvent("ADDON_LOADED")
-
+	wowCron.started = time()
+	wowCron.lastUpdated = time()
 	wowCron.ParseAll()
 	wowCron.BuildSlashCommands()
 	--INEED.OptionsPanel_Reset();
@@ -78,8 +85,8 @@ function wowCron.PLAYER_ENTERING_WORLD()
 	wowCron_Frame:UnregisterEvent("PLAYER_ENTERING_WORLD")
 	wowCron.BuildSlashCommands()
 end
-
 -- Support Code
+-- Begin Handle commands
 wowCron.actionsList = {}
 function wowCron.CallAddon( slash, parameters )
 	-- loop through cron_knownSlashCmds (for other loaded addons)
@@ -92,7 +99,7 @@ function wowCron.CallAddon( slash, parameters )
 		end
 	end
 end
-wowCron.actionsList[1] = wowCron.CallAddon
+tinsert( wowCron.actionsList, wowCron.CallAddon )
 function wowCron.CallEmote( slash, parameters )
 	-- look for emote in cron_knownEmotes for emotes to call
 	-- return true if could handle the slash command
@@ -104,7 +111,18 @@ function wowCron.CallEmote( slash, parameters )
 		end
 	end
 end
-wowCron.actionsList[2] = wowCron.CallEmote
+tinsert( wowCron.actionsList, wowCron.CallEmote )
+function wowCron.SendMessage( slash, parameters )
+	slash = string.lower(slash)
+	-- look for the standard chat commands and send the contents of parameters to the corrisponding channel
+	for cmd, channel in pairs( wowCron.chatChannels ) do
+		if slash == cmd then
+			SendChatMessage( parameters, channel, nil, nil )
+			return true
+		end
+	end
+end
+tinsert( wowCron.actionsList, wowCron.SendMessage )
 function wowCron.RunScript( slash, parameters )
 	slash = string.lower( slash )
 	--print("RunScript( "..slash..", "..parameters.." )")
@@ -114,8 +132,8 @@ function wowCron.RunScript( slash, parameters )
 		return true
 	end
 end
-wowCron.actionsList[3] = wowCron.RunScript
-
+tinsert( wowCron.actionsList, wowCron.RunScript )
+-- End Handle commands
 function wowCron.BuildSlashCommands()
 	local count = 0
 	for k,v in pairs(SlashCmdList) do
@@ -144,8 +162,22 @@ function wowCron.RunNow( cmdIn, ts )
 	-- @return boolean run this command now (1, nil)
 	-- @return string command to run (cmd, nil)
 
+	-- do the macro expansion here, since I want to return true for @first if within the first ~60 seconds of being run.
+	local macro, cmd = strmatch( cmdIn, "^(@%S+)%s+(.*)$" )
+	if macro then
+		if (string.lower(macro) == "@first") and ((time() - wowCron.started) <= 75) then  -- @first and first run, return true
+			return true, cmd
+		elseif wowCron.macros[macro] then -- not @first, but is in the list of macros, expand the macro
+			cmdIn = wowCron.macros[macro].." "..cmd
+		end -- invalid cron should be found later
+	end
+
 	-- put all six values into parsed table
 	parsed = { wowCron.Parse( cmdIn ) }
+	if #parsed == 0 then -- no values returned.  Invalid cron
+		--print("No values parsed, bad cron entry '"..cmdIn.."'")
+		return -- return nil (no run)
+	end
 	local ts = ts or time()
 	local ts = date( "*t", ts )
 
@@ -203,26 +235,27 @@ function wowCron.Expand( value, type )
 	end
 	return out
 end
-
 function wowCron.ParseAll()
 	-- Only when starting, or changing
 	wowCron.events = {}
-	for _, cmd in ipairs(cron_global) do
-		tinsert( wowCron.events, cmd )
-	end
 	-- player specific events
 	for _, cmd in ipairs(cron_player) do
 		tinsert( wowCron.events, cmd )
 	end
-
+	-- global events
+	for _, cmd in ipairs(cron_global) do
+		tinsert( wowCron.events, cmd )
+	end
 end
 function wowCron.Parse( cron )
 	-- takes the cron string and returns the 5 cron patterns, and the command
+	-- returns nil if this encounters a bad pattern
+
+	-- parse the 6, space delimited values.
 	local min, hour, day, month, wday, cmd =
-			strmatch( cron,	"^(%S+)%s*(%S+)%s*(%S+)%s*(%S+)%s*(%S+)%s*(.*)$" )
+			strmatch( cron,	"^(%S+)%s+(%S+)%s+(%S+)%s+(%S+)%s+(%S+)%s+(.*)$" )
 	return min, hour, day, month, wday, cmd
 end
-
 function wowCron.DeconstructCmd( cmdIn )
 	local a,b,c = strfind( cmdIn, "(%S+)" )
 	if a then
@@ -254,6 +287,7 @@ function wowCron.Remove( index )
 		local entry = table.remove( cronTable, index )
 		wowCron.Print( COLOR_RED.."REMOVING: "..COLOR_END..entry )
 	end
+	wowCron.ParseAll()
 end
 function wowCron.AddEntry( entry )
 	if strlen( entry ) >= 9 then -- VERY mimimum size of a cron is 9 char (5x * and 4 spaces)
@@ -263,6 +297,7 @@ function wowCron.AddEntry( entry )
 	else
 		wowCron.PrintHelp()
 	end
+	wowCron.ParseAll()
 end
 wowCron.CommandList = {
 	["help"] = {
@@ -305,4 +340,3 @@ function wowCron.Print( msg, showName)
 	end
 	DEFAULT_CHAT_FRAME:AddMessage( msg )
 end
-

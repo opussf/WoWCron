@@ -25,6 +25,7 @@ function test.before()
 	}
 	wowCron.OnLoad()
 	wowCron.ADDON_LOADED()
+	wowCron.PLAYER_ENTERING_WORLD()
 	nextMin = wowCron.lastUpdated+(60-(wowCron.lastUpdated%60))  -- compute the TS of the next top of the minute
 end
 function test.after()
@@ -204,8 +205,41 @@ function test.testRunNow_onSunday_no()
 end
 function test.testRunNow_noCmd()
 	local ts = 1401054240 -- Sunday 14:44
-	local run, cmd = wowCron.RunNow( "* * * * *", ts )
+	local run, cmd = wowCron.RunNow( "* * * * * ", ts )
 	assertEquals( "", cmd )
+end
+function test.testRunNow_noCmd_noTrailingSpace()
+	local ts = 1401054240 -- Sunday 14:44
+	local run, cmd = wowCron.RunNow( "* * * * *", ts )
+	assertIsNil( run, "This should be nil" )
+end
+function test.testRunNow_macro_hourly()
+	local ts = 1401055200 -- Sunday 15:00
+	local run, cmd = wowCron.RunNow( "@hourly /hello", ts )
+	assertTrue( run, "This should be true" )
+end
+function test.testRunNow_macro_midnight()
+	local ts = time({["year"] = 2016, ["month"] = 5, ["day"] = 25, ["hour"] = 0, ["min"] = 0, ["sec"] = 0})
+	local run, cmd = wowCron.RunNow( "@midnight /hello it is @midnight.", ts )
+	assertTrue( run, "This should be true" )
+end
+function test.testRunNow_explicit_midnight()
+	local ts = time({["year"] = 2016, ["month"] = 5, ["day"] = 25, ["hour"] = 0, ["min"] = 0, ["sec"] = 0})
+	local run, cmd = wowCron.RunNow( "0 0 * * * /hello it is 0 0", ts )
+	assertTrue( run, "This should be true" )
+end
+function test.testRunNow_macro_firstminute_runs()
+	local run, cmd = wowCron.RunNow( "@first /hello" )
+	assertTrue( run, "This should be true" )
+end
+function test.testRunNow_macro_firstminute_runs_upper()
+	local run, cmd = wowCron.RunNow( "@FIRST /hello" )
+	assertTrue( run, "This should be true" )
+end
+function test.testRunNow_macro_firstminute_doesNotRun()
+	wowCron.started = 1401001200 -- started a LONG time ago
+	local run, cmd = wowCron.RunNow( "@first /hello" )
+	assertIsNil( run, "This should be nil" )
 end
 function test.testCmd_global_flag()
 	wowCron.Command("global")
@@ -225,16 +259,34 @@ function test.testCmd_player_rm()
 	wowCron.Command("rm 1")
 	assertEquals( 0, #cron_player )
 end
-function test.testCmd_global_add()
+function test.testCmd_global_add_default()
 	wowCron.Command("global * * * * * /cron list")
 	assertEquals( "* * * * * /cron list", cron_global[6] )
 end
-function test.testCmd_player_add()
+function test.testCmd_player_add_default()
 	wowCron.Command("* * * * * /cron list")
 	assertEquals( "* * * * * /cron list", cron_player[2] )
 end
-
-
+function test.testCmd_global_add_explicit()
+	wowCron.Command("global add * * * * * /cron list")
+	assertEquals( "* * * * * /cron list", cron_global[6] )
+end
+function test.testCmd_player_add_explicit()
+	wowCron.Command("add * * * * * /cron list")
+	assertEquals( "* * * * * /cron list", cron_player[2] )
+end
+function test.testChatMsg_s()
+	local ts = 1401054240  -- Sunday 14:44
+	assertTrue( wowCron.SendMessage( "/s", "Hello all." ) )
+end
+function test.testChatMsg_say()
+	local ts = 1401054240  -- Sunday 14:44
+	assertTrue( wowCron.SendMessage( "/SAY", "Hello all." ) )
+end
+function test.testChatMsg_g()
+	local ts = 1401054240  -- Sunday 14:44
+	assertTrue( wowCron.SendMessage( "/G", "Hello all." ) )
+end
 
 
 test.run()
