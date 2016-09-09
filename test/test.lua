@@ -213,7 +213,6 @@ function test.testRunNow_noCmd_noTrailingSpace()
 	local run, cmd = wowCron.RunNow( "* * * * *", ts )
 	assertIsNil( run, "This should be nil" )
 end
-
 function test.testRunNow_macro_hourly()
 	local ts = 1401055200 -- Sunday 15:00
 	local run, cmd = wowCron.RunNow( "@hourly /hello", ts )
@@ -221,7 +220,12 @@ function test.testRunNow_macro_hourly()
 end
 function test.testRunNow_macro_midnight()
 	local ts = 1401001200 -- Sunday 00:00
-	local run, cmd = wowCron.RunNow( "@midnight /hello", ts )
+	local run, cmd = wowCron.RunNow( "@midnight /hello it is @midnight.", ts )
+	assertTrue( run, "This should be true" )
+end
+function test.testRunNow_explicit_midnight()
+	local ts = 1401001200 -- Sunday 00:00
+	local run, cmd = wowCron.RunNow( "0 0 * * * /hello it is 0 0", ts )
 	assertTrue( run, "This should be true" )
 end
 function test.testRunNow_macro_firstminute_runs()

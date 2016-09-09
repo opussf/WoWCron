@@ -175,6 +175,7 @@ function wowCron.RunNow( cmdIn, ts )
 	-- put all six values into parsed table
 	parsed = { wowCron.Parse( cmdIn ) }
 	if #parsed == 0 then -- no values returned.  Invalid cron
+		print("No values parsed, bad cron entry '"..cmdIn.."'")
 		return -- return nil (no run)
 	end
 	local ts = ts or time()
@@ -189,8 +190,10 @@ function wowCron.RunNow( cmdIn, ts )
 	-- this is technically incorrect, will have to revisit this later.
 	-- wday and day should be or if they are not wild cards.
 	isMatch = true
+	print(cmdIn)
 	for i, fieldName in pairs( wowCron.fieldNames ) do
 		isMatch = isMatch and wowCron.TableHasKey( parsed[i], ts[fieldName] )
+		print(fieldName.." value: "..ts[fieldName].." matches? "..(isMatch and "yes" or "no"))
 	end
 
 	return isMatch, parsed[6]
