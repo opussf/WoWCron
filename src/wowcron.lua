@@ -36,19 +36,19 @@ wowCron.macros = {
 	["@midnight"] = "0 0 * * *",
 }
 wowCron.chatChannels = {
-	["/s"] = "SAY",
-	["/say"] = "SAY",
-	["/g"] = "GUILD",
+	["/s"]    = "SAY",
+	["/say"]  = "SAY",
+	["/g"]    = "GUILD",
+	["/y"]    = "YELL",
+	["/yell"] = "YELL",
 }
 -- events
 function wowCron.OnLoad()
 	SLASH_CRON1 = "/CRON"
 	SlashCmdList["CRON"] = function(msg) wowCron.Command(msg); end
-
 	wowCron_Frame:RegisterEvent("ADDON_LOADED")
 	wowCron_Frame:RegisterEvent("PLAYER_ENTERING_WORLD")
 	wowCron.lastUpdated = time()
-	wowCron.started = time()
 end
 function wowCron.OnUpdate()
 	nowTS = time()
@@ -69,15 +69,12 @@ function wowCron.OnUpdate()
 				end
 			end
 		end
-		if (now.min == 0) then
-			wowCron.Print("On the hour")
-		end
 	end
 end
 function wowCron.ADDON_LOADED()
 	-- Unregister the event for this method.
 	wowCron_Frame:UnregisterEvent("ADDON_LOADED")
-
+	wowCron.started = time()
 	wowCron.ParseAll()
 	wowCron.BuildSlashCommands()
 	--INEED.OptionsPanel_Reset();
@@ -167,7 +164,7 @@ function wowCron.RunNow( cmdIn, ts )
 	-- do the macro expansion here, since I want to return true for @first if within the first ~60 seconds of being run.
 	local macro, cmd = strmatch( cmdIn, "^(@%S+)%s+(.*)$" )
 	if macro then
-		if string.lower(macro) == "@first" and (time() - wowCron.started) <= 62 then  -- @first and first run, return true
+		if (string.lower(macro) == "@first") and ((time() - wowCron.started) <= 75) then  -- @first and first run, return true
 			return true, cmd
 		elseif wowCron.macros[macro] then -- not @first, but is in the list of macros, expand the macro
 			cmdIn = wowCron.macros[macro].." "..cmd
