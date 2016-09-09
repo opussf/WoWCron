@@ -26,11 +26,11 @@ wowCron.events = {}  -- [nextTS] = {[1]={['event'] = 'runME', ['fullEvent'] = '*
 wowCron.ranges = {
 	["min"]   = {0,59},
 	["hour"]  = {0,23},
-	["month"] = {1,12},
 	["day"]   = {1,31},
+	["month"] = {1,12},
 	["wday"]  = {0,7}, -- 0 and 7 is sunday
 }
-wowCron.fieldNames = { "min", "hour", "month", "day", "wday" }
+wowCron.fieldNames = { "min", "hour", "day", "month", "wday" }
 wowCron.macros = {
 	["@hourly"]   = "0 * * * *",
 	["@midnight"] = "0 0 * * *",
@@ -336,7 +336,7 @@ function wowCron.Print( msg, showName)
 	-- print to the chat frame
 	-- set showName to false to suppress the addon name printing
 	if (showName == nil) or (showName) then
-		msg = WOWCRON_MSG_ADDONNAME.."> "..msg
+		msg = COLOR_GOLD..WOWCRON_MSG_ADDONNAME..COLOR_END.."> "..msg
 	end
 	DEFAULT_CHAT_FRAME:AddMessage( msg )
 end
