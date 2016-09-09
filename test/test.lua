@@ -219,12 +219,12 @@ function test.testRunNow_macro_hourly()
 	assertTrue( run, "This should be true" )
 end
 function test.testRunNow_macro_midnight()
-	local ts = 1401001200 -- Sunday 00:00
+	local ts = time({["year"] = 2016, ["month"] = 5, ["day"] = 25, ["hour"] = 0, ["min"] = 0, ["sec"] = 0})
 	local run, cmd = wowCron.RunNow( "@midnight /hello it is @midnight.", ts )
 	assertTrue( run, "This should be true" )
 end
 function test.testRunNow_explicit_midnight()
-	local ts = 1401001200 -- Sunday 00:00
+	local ts = time({["year"] = 2016, ["month"] = 5, ["day"] = 25, ["hour"] = 0, ["min"] = 0, ["sec"] = 0})
 	local run, cmd = wowCron.RunNow( "0 0 * * * /hello it is 0 0", ts )
 	assertTrue( run, "This should be true" )
 end
