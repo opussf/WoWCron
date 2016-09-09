@@ -255,12 +255,20 @@ function test.testCmd_player_rm()
 	wowCron.Command("rm 1")
 	assertEquals( 0, #cron_player )
 end
-function test.testCmd_global_add()
+function test.testCmd_global_add_default()
 	wowCron.Command("global * * * * * /cron list")
 	assertEquals( "* * * * * /cron list", cron_global[6] )
 end
-function test.testCmd_player_add()
+function test.testCmd_player_add_default()
 	wowCron.Command("* * * * * /cron list")
+	assertEquals( "* * * * * /cron list", cron_player[2] )
+end
+function test.testCmd_global_add_explicit()
+	wowCron.Command("global add * * * * * /cron list")
+	assertEquals( "* * * * * /cron list", cron_global[6] )
+end
+function test.testCmd_player_add_explicit()
+	wowCron.Command("add * * * * * /cron list")
 	assertEquals( "* * * * * /cron list", cron_player[2] )
 end
 function test.testChatMsg_s()
