@@ -48,7 +48,6 @@ function wowCron.OnLoad()
 	SlashCmdList["CRON"] = function(msg) wowCron.Command(msg); end
 	wowCron_Frame:RegisterEvent("ADDON_LOADED")
 	wowCron_Frame:RegisterEvent("PLAYER_ENTERING_WORLD")
-	wowCron.lastUpdated = time()
 end
 function wowCron.OnUpdate()
 	nowTS = time()
@@ -75,6 +74,7 @@ function wowCron.ADDON_LOADED()
 	-- Unregister the event for this method.
 	wowCron_Frame:UnregisterEvent("ADDON_LOADED")
 	wowCron.started = time()
+	wowCron.lastUpdated = time()
 	wowCron.ParseAll()
 	wowCron.BuildSlashCommands()
 	--INEED.OptionsPanel_Reset();
