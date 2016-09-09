@@ -6,24 +6,18 @@
 | + ------- hour (0 - 23)
 + --------- minute (0 - 59)
 
+@first    = run once after the first login
+@hourly   = 0 * * * *
+@midnight = 0 0 * * *
 
+<command> = "/<addon command>" | "/<emote token>" | "/run | /script" <lua code> | "/say | /guild | /yell"
 
-----
-http://www.lua.org/pil/22.1.html
+/cron [global] <add | list | rm <index>> <cron entry>
 
-    temp = os.date("*t", 906000490)
+Examples:
+/cron global list
+/cron global rm 1
+/cron add * * * * * /yell Hello
+/cron add */10 * * * * /run SortBags()
+/cron add @first /cron list
 
-produces the table
-    {year = 1998, month = 9, day = 16, yday = 259, wday = 4,   (1 = Sunday)
-     hour = 23, min = 48, sec = 10, isdst = false}
-
-
-----
-
-wowCron.nextEvent = TS of next event
-wowCron.events[TS] is a list of events to run
-
-
-----
-
-/console scriptErrors 1
