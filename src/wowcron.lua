@@ -26,11 +26,11 @@ wowCron.events = {}  -- [nextTS] = {[1]={['event'] = 'runME', ['fullEvent'] = '*
 wowCron.ranges = {
 	["min"]   = {0,59},
 	["hour"]  = {0,23},
-	["month"] = {1,12},
 	["day"]   = {1,31},
+	["month"] = {1,12},
 	["wday"]  = {0,7}, -- 0 and 7 is sunday
 }
-wowCron.fieldNames = { "min", "hour", "month", "day", "wday" }
+wowCron.fieldNames = { "min", "hour", "day", "month", "wday" }
 wowCron.macros = {
 	["@hourly"]   = "0 * * * *",
 	["@midnight"] = "0 0 * * *",
@@ -74,18 +74,25 @@ end
 function wowCron.ADDON_LOADED()
 	-- Unregister the event for this method.
 	wowCron_Frame:UnregisterEvent("ADDON_LOADED")
-	wowCron.started = time()
 	wowCron.lastUpdated = time()
 	wowCron.ParseAll()
 	wowCron.BuildSlashCommands()
-	--INEED.OptionsPanel_Reset();
 	--wowCron.Print("Loaded")
 end
 function wowCron.PLAYER_ENTERING_WORLD()
+	-- since this only gets called once, the can be where the @first macro is created.
 	wowCron_Frame:UnregisterEvent("PLAYER_ENTERING_WORLD")
 	wowCron.BuildSlashCommands()
+	wowCron.started = time()
+	wowCron.macros["@first"] = wowCron.BuildFirstCronMacro()
 end
 -- Support Code
+function wowCron.BuildFirstCronMacro()
+	-- returns a specific cron for the next minute based on wowCron.started
+	local tt = date( "*t", wowCron.started + 60 )
+	return (string.format("%s %s %s %s *", tt.min, tt.hour, tt.day, tt.month))
+
+end
 -- Begin Handle commands
 wowCron.actionsList = {}
 function wowCron.CallAddon( slash, parameters )
@@ -164,12 +171,8 @@ function wowCron.RunNow( cmdIn, ts )
 
 	-- do the macro expansion here, since I want to return true for @first if within the first ~60 seconds of being run.
 	local macro, cmd = strmatch( cmdIn, "^(@%S+)%s+(.*)$" )
-	if macro then
-		if (string.lower(macro) == "@first") and ((time() - wowCron.started) <= 75) then  -- @first and first run, return true
-			return true, cmd
-		elseif wowCron.macros[macro] then -- not @first, but is in the list of macros, expand the macro
-			cmdIn = wowCron.macros[macro].." "..cmd
-		end -- invalid cron should be found later
+	if macro and wowCron.macros[macro] then -- expand the macro
+		cmdIn = wowCron.macros[macro].." "..cmd
 	end
 
 	-- put all six values into parsed table
@@ -336,7 +339,7 @@ function wowCron.Print( msg, showName)
 	-- print to the chat frame
 	-- set showName to false to suppress the addon name printing
 	if (showName == nil) or (showName) then
-		msg = WOWCRON_MSG_ADDONNAME.."> "..msg
+		msg = COLOR_GOLD..WOWCRON_MSG_ADDONNAME..COLOR_END.."> "..msg
 	end
 	DEFAULT_CHAT_FRAME:AddMessage( msg )
 end
