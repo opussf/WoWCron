@@ -55,7 +55,7 @@ function wowCron.OnUpdate()
 	local now = date( "*t", nowTS )
 	if (wowCron.lastUpdated < nowTS) and (now.sec == 0) then
 		wowCron.lastUpdated = nowTS
-		wowCron.Print(date("%H:%M"))
+		--wowCron.Print(date("%H:%M"))
 		for _,cron in pairs( wowCron.events ) do
 			runNow, cmd = wowCron.RunNow( cron )
 			if runNow then

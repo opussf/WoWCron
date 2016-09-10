@@ -53,6 +53,7 @@ The allowed commands can be any of the following:
 
 * ```0,15,30,45 * * * * /train``` does the train macro on the quarter hour marks.
 * ```*/2 * * * * /run SortBags()``` calls the SortBags() function every 2 minutes.
+* ```* * * * * /run wowCron.Print(date("%H:%M"))``` prints the time every minute.
 * ```@first /ineed list``` runs the ineed addon with the list command.
 
 
