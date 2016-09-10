@@ -55,12 +55,12 @@ function wowCron.OnUpdate()
 	local now = date( "*t", nowTS )
 	if (wowCron.lastUpdated < nowTS) and (now.sec == 0) then
 		wowCron.lastUpdated = nowTS
-		wowCron.Print(date("%H:%M"))
+		--wowCron.Print(date("%H:%M"))
 		for _,cron in pairs( wowCron.events ) do
 			runNow, cmd = wowCron.RunNow( cron )
 			if runNow then
 				slash, parameters = wowCron.DeconstructCmd( cmd )
-				print("do now: "..slash.." "..parameters)
+				if wowCron.debug then print("do now: "..slash.." "..parameters) end
 				-- find the function to call based on the slashcommand
 				isGood = false
 				for _,func in ipairs(wowCron.actionsList) do
