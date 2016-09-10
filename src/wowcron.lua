@@ -1,5 +1,5 @@
 WOWCRON_MSG_ADDONNAME = "WoWCron";
-WOWCRON_MSG_VERSION   = GetAddOnMetadata(INEED_MSG_ADDONNAME,"Version");
+WOWCRON_MSG_VERSION   = GetAddOnMetadata(WOWCRON_MSG_ADDONNAME,"Version");
 WOWCRON_MSG_AUTHOR    = "opussf";
 
 -- Colours
