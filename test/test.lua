@@ -316,6 +316,10 @@ function test.testChatMsg_g()
 	local ts = 1401054240  -- Sunday 14:44
 	assertTrue( wowCron.SendMessage( "/G", "Hello all." ) )
 end
-
+function test.testMacro_unkownMacro()
+	local ts = 1401055200 -- Sunday 15:00
+	local run, cmd = wowCron.RunNow( "@hurly /hello there mortal one. What is up?", ts )
+	assertIsNil( run, "This should be nil" )
+end
 
 test.run()
