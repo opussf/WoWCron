@@ -31,6 +31,7 @@ wowCron.ranges = {
 	["wday"]  = {0,7}, -- 0 and 7 is sunday
 }
 wowCron.fieldNames = { "min", "hour", "day", "month", "wday" }
+wowCron.monthNames = { "jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec" }
 wowCron.macros = {
 	["@hourly"]   = "0 * * * *",
 	["@midnight"] = "0 0 * * *",
@@ -213,13 +214,20 @@ function wowCron.TableHasKey( table, key )
 		end
 	end
 end
-function wowCron.Expand( value, type )
+function wowCron.Expand( value, fieldName )
 	-- @parm value Value to expand
-	-- @param type The type to expand
+	-- @param fieldName The type of field to expand
 	-- @return table of possible values as keys
 
 	-- valid min/max values are in wowCron.ranges.type
-	local minVal, maxVal = unpack(wowCron.ranges[type])
+	local minVal, maxVal = unpack(wowCron.ranges[fieldName])
+
+	if fieldName == "month" then alias = wowCron.monthNames
+	else alias = nil
+	end
+	if alias then
+
+	end
 
 	-- Expand * to min-max
 	value = string.gsub(value, "*", minVal.."-"..maxVal)
@@ -238,7 +246,7 @@ function wowCron.Expand( value, type )
 
 		for v = s, e, step do
 			if v >= minVal and v <= maxVal then  -- @TODO should this toss an error of some sort, or just quietly fail?  Where should the error be registered?
-				out[type == "wday" and v+1 or v] = 1 -- add one for the wday conversion
+				out[fieldName == "wday" and v+1 or v] = 1 -- add one for the wday conversion
 			end
 		end
 	end
