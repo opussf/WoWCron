@@ -268,7 +268,7 @@ end
 function wowCron.DeconstructCmd( cmdIn )
 	local a,b,c = strfind( cmdIn, "(%S+)" )
 	if a then
-		return c, strsub( cmdIn, b+2 )
+		return c, (strmatch( strsub( cmdIn, b+2 ), "^%s*(%S.*)" ) or "")  -- strip leading spaces (nil if nothing, return empty string then)
 	else
 		return ""
 	end
