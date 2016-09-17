@@ -171,8 +171,13 @@ function wowCron.RunNow( cmdIn, ts )
 
 	-- do the macro expansion here, since I want to return true for @first if within the first ~60 seconds of being run.
 	local macro, cmd = strmatch( cmdIn, "^(@%S+)%s+(.*)$" )
-	if macro and wowCron.macros[macro] then -- expand the macro
-		cmdIn = wowCron.macros[macro].." "..cmd
+	if macro then
+		if wowCron.macros[macro] then -- expand the macro
+			cmdIn = wowCron.macros[macro].." "..cmd
+		else
+			print("Invalid macro in: "..cmdIn)
+			return
+		end
 	end
 
 	-- put all six values into parsed table
@@ -195,6 +200,7 @@ function wowCron.RunNow( cmdIn, ts )
 	isMatch = true
 	for i, fieldName in pairs( wowCron.fieldNames ) do
 		isMatch = isMatch and wowCron.TableHasKey( parsed[i], ts[fieldName] )
+		if not isMatch then break end -- exit the loop on first failure
 	end
 
 	return isMatch, parsed[6]
@@ -262,7 +268,7 @@ end
 function wowCron.DeconstructCmd( cmdIn )
 	local a,b,c = strfind( cmdIn, "(%S+)" )
 	if a then
-		return c, strsub( cmdIn, b+2 )
+		return c, (strmatch( strsub( cmdIn, b+2 ), "^%s*(%S.*)" ) or "")  -- strip leading spaces (nil if nothing, return empty string then)
 	else
 		return ""
 	end
