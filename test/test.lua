@@ -321,5 +321,10 @@ function test.testMacro_unkownMacro()
 	local run, cmd = wowCron.RunNow( "@hurly /hello there mortal one. What is up?", ts )
 	assertIsNil( run, "This should be nil" )
 end
+function test.testCmd_spaceStrip()
+	cmd, parameters = wowCron.DeconstructCmd( "/hello  There is an extra space here." )
+	assertEquals( "There is an extra space here.", parameters )
+end
+
 
 test.run()
