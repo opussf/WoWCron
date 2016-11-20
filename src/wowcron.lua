@@ -59,9 +59,9 @@ function wowCron.OnUpdate()
 	nowTS = time()
 	local now = date( "*t", nowTS )
 	if (wowCron.lastUpdated < nowTS) and (now.sec == 0) then
-		wowCron.Print("Update")
 		wowCron.lastUpdated = nowTS
 		wowCron.BuildRunNowList() -- This is where building the list needs to happen.
+		--wowCron.Print("Update: "..#wowCron.toRun)
 	end
 end
 function wowCron.ADDON_LOADED()
@@ -70,6 +70,7 @@ function wowCron.ADDON_LOADED()
 	wowCron.lastUpdated = time()
 	wowCron.ParseAll()
 	wowCron.BuildSlashCommands()
+	wowCron.processThread = coroutine.create(wowCron.RunNowList)
 	--wowCron.Print("Loaded")
 end
 function wowCron.PLAYER_ENTERING_WORLD()
