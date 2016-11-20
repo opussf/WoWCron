@@ -43,6 +43,7 @@ wowCron.chatChannels = {
 	["/y"]    = "YELL",
 	["/yell"] = "YELL",
 }
+wowCron.toRun = {}
 -- events
 function wowCron.OnLoad()
 	SLASH_CRON1 = "/CRON"
@@ -51,24 +52,16 @@ function wowCron.OnLoad()
 	wowCron_Frame:RegisterEvent("PLAYER_ENTERING_WORLD")
 end
 function wowCron.OnUpdate()
+	-- if the toRun list has items, this should not be dead.
+	if coroutine.status(wowCron.processThread) ~= "dead" then
+		coroutine.resume(wowCron.processThread)
+	end
 	nowTS = time()
 	local now = date( "*t", nowTS )
 	if (wowCron.lastUpdated < nowTS) and (now.sec == 0) then
+		wowCron.Print("Update")
 		wowCron.lastUpdated = nowTS
-		--wowCron.Print(date("%H:%M"))
-		for _,cron in pairs( wowCron.events ) do
-			runNow, cmd = wowCron.RunNow( cron )
-			if runNow then
-				slash, parameters = wowCron.DeconstructCmd( cmd )
-				if wowCron.debug then print("do now: "..slash.." "..parameters) end
-				-- find the function to call based on the slashcommand
-				isGood = false
-				for _,func in ipairs(wowCron.actionsList) do
-					isGood = isGood or func( slash, parameters )
-					if isGood then break end
-				end
-			end
-		end
+		wowCron.BuildRunNowList() -- This is where building the list needs to happen.
 	end
 end
 function wowCron.ADDON_LOADED()
@@ -91,7 +84,33 @@ function wowCron.BuildFirstCronMacro()
 	-- returns a specific cron for the next minute based on wowCron.started
 	local tt = date( "*t", wowCron.started + 60 )
 	return (string.format("%s %s %s %s *", tt.min, tt.hour, tt.day, tt.month))
-
+end
+function wowCron.BuildRunNowList()
+	for _, cron in pairs( wowCron.events ) do
+		runNow, cmd = wowCron.RunNow( cron )
+		if runNow then
+			--slash, parameters = wowCron.DeconstructCmd( cmd )
+			if wowCron.debug then print("register to do now: "..cmd) end
+			table.insert( wowCron.toRun, cmd )
+		end
+	end
+	wowCron.processThread = coroutine.create(wowCron.RunNowList)
+end
+function wowCron.RunNowList()
+	while (#wowCron.toRun > 0) do
+		cmd = table.remove( wowCron.toRun, 1 )
+		--print("CMD: "..(cmd or "nil"))
+		if cmd then
+			slash, parameters = wowCron.DeconstructCmd( cmd )
+			if wowCron.debug then print("do now: "..slash.." "..parameters) end
+			-- find the function to call based on the slashcommand
+			isGood = false
+			for _,func in ipairs(wowCron.actionsList) do
+				isGood = isGood or func( slash, parameters )
+			end
+		end
+		coroutine.yield()
+	end
 end
 -- Begin Handle commands
 wowCron.actionsList = {}

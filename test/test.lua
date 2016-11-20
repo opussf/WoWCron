@@ -29,6 +29,7 @@ function test.before()
 	nextMin = wowCron.lastUpdated+(60-(wowCron.lastUpdated%60))  -- compute the TS of the next top of the minute
 end
 function test.after()
+	wowCron.toRun = {}
 end
 function test.validValues( expected, actual )
 	-- takes 2 tables [val] = 1 and compares them
@@ -324,6 +325,29 @@ end
 function test.testCmd_spaceStrip()
 	cmd, parameters = wowCron.DeconstructCmd( "/hello  There is an extra space here." )
 	assertEquals( "There is an extra space here.", parameters )
+end
+function test.testBuildRunNowList_CreatesEntries()
+	wowCron.Command("* * * * * /cron list")
+	wowCron.BuildRunNowList()
+	assertEquals( 2, #wowCron.toRun )
+end
+function test.testRunNowList_runsOnEmptyList()
+	assertEquals( 0, #wowCron.toRun )  -- start with it empty.  Make sure of this
+	wowCron.RunNowList()
+end
+function test.testOnUpdate_runOne()
+	wowCron.Command("* * * * * /cron list")
+	wowCron.BuildRunNowList()
+	wowCron.OnUpdate()
+	assertEquals( 1, #wowCron.toRun ) -- one should be left
+end
+function test.testOnUpdate_runTwo()
+	wowCron.Command("* * * * * /cron list")
+	wowCron.BuildRunNowList()
+	wowCron.OnUpdate()
+	assertEquals( 1, #wowCron.toRun, "One Left?") -- one should be left
+	wowCron.OnUpdate()
+	assertEquals( 0, #wowCron.toRun ) -- none left
 end
 
 
