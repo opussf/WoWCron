@@ -1,8 +1,10 @@
 # Features
 
+"* * * * * /run wowCron.Print(date(\"%H:%M\"))", -- [12]
+
 ## coroutine
 
-Create a FIFO
+Create a FIFO, process the FIFO as a coroutine
 
 local function someCalculation()
    local output = ""
@@ -33,3 +35,4 @@ frame:SetScript("OnUpdate", function(self, elapsed)
          end
       end
 end)
+
