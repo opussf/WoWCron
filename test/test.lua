@@ -327,6 +327,8 @@ function test.testCmd_spaceStrip()
 	assertEquals( "There is an extra space here.", parameters )
 end
 function test.testBuildRunNowList_CreatesEntries()
+	cron_player = {"* * * * * /in item:54233 7" }
+	cron_global = {}
 	wowCron.Command("* * * * * /cron list")
 	wowCron.BuildRunNowList()
 	assertEquals( 2, #wowCron.toRun )
@@ -336,12 +338,16 @@ function test.testRunNowList_runsOnEmptyList()
 	wowCron.RunNowList()
 end
 function test.testOnUpdate_runOne()
+	cron_player = {"* * * * * /in item:54233 7" }
+	cron_global = {}
 	wowCron.Command("* * * * * /cron list")
 	wowCron.BuildRunNowList()
 	wowCron.OnUpdate()
 	assertEquals( 1, #wowCron.toRun ) -- one should be left
 end
 function test.testOnUpdate_runTwo()
+	cron_player = {"* * * * * /in item:54233 7" }
+	cron_global = {}
 	wowCron.Command("* * * * * /cron list")
 	wowCron.BuildRunNowList()
 	wowCron.OnUpdate()
