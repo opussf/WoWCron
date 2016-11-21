@@ -345,7 +345,7 @@ function test.testOnUpdate_runTwo()
 	wowCron.Command("* * * * * /cron list")
 	wowCron.BuildRunNowList()
 	wowCron.OnUpdate()
-	assertEquals( 1, #wowCron.toRun, "One Left?") -- one should be left
+	assertEquals( 1, #wowCron.toRun ) -- one should be left
 	wowCron.OnUpdate()
 	assertEquals( 0, #wowCron.toRun ) -- none left
 end
