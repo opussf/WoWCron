@@ -266,13 +266,14 @@ function wowCron.Expand( value, type )
 end
 function wowCron.ParseAll()
 	-- Only when starting, or changing
+	-- Player specific events should happen last.
 	wowCron.events = {}
-	-- player specific events
-	for _, cmd in ipairs(cron_player) do
-		tinsert( wowCron.events, cmd )
-	end
 	-- global events
 	for _, cmd in ipairs(cron_global) do
+		tinsert( wowCron.events, cmd )
+	end
+	-- player specific events
+	for _, cmd in ipairs(cron_player) do
 		tinsert( wowCron.events, cmd )
 	end
 end
