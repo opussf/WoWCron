@@ -355,6 +355,9 @@ function test.testOnUpdate_runTwo()
 	wowCron.OnUpdate()
 	assertEquals( 0, #wowCron.toRun ) -- none left
 end
+function test.testPlayerEventsAreLast()
+	assertEquals( "* * * * * /in item:54233 7", wowCron.events[6])
+end
 
 
 test.run()
