@@ -322,6 +322,41 @@ function test.testMacro_unkownMacro()
 	local run, cmd = wowCron.RunNow( "@hurly /hello there mortal one. What is up?", ts )
 	assertIsNil( run, "This should be nil" )
 end
+function test.testMonthNameExpansion_oneMonth_yes()
+	local ts = time({["year"] = 2016, ["month"] = 5, ["day"] = 25, ["hour"] = 0, ["min"] = 0, ["sec"] = 0})
+	local run, cmd = wowCron.RunNow( "* * * may * /hello it is in May.", ts )
+	assertTrue( run, "This should run." )
+end
+function test.testMonthNameExpansion_oneMonth_no()
+	local ts = time({["year"] = 2016, ["month"] = 5, ["day"] = 25, ["hour"] = 0, ["min"] = 0, ["sec"] = 0})
+	local run, cmd = wowCron.RunNow( "* * * jun * /hello it is in June.", ts )
+	assertIsNil( run, "This should not run" )
+end
+function test.testMonthNameExpansion_twoMonths_yes()
+	local ts = time({["year"] = 2016, ["month"] = 5, ["day"] = 25, ["hour"] = 0, ["min"] = 0, ["sec"] = 0})
+	local run, cmd = wowCron.RunNow( "* * * apr,may * /hello it is in May.", ts )
+	assertTrue( run, "This should run." )
+end
+function test.testMonthNameExpansion_twoMonths_no()
+	local ts = time({["year"] = 2016, ["month"] = 5, ["day"] = 25, ["hour"] = 0, ["min"] = 0, ["sec"] = 0})
+	local run, cmd = wowCron.RunNow( "* * * jun,jul * /hello it is in June or July.", ts )
+	assertIsNil( run, "This should not run" )
+end
+function test.testMonthNameExpansion_twoMonthsRange_yes()
+	local ts = time({["year"] = 2016, ["month"] = 5, ["day"] = 25, ["hour"] = 0, ["min"] = 0, ["sec"] = 0})
+	local run, cmd = wowCron.RunNow( "* * * apr-jun * /hello it is in Apr-Jun.", ts )
+	assertTrue( run, "This should run." )
+end
+function test.testMonthNameExpansion_twoMonthsRange_no()
+	local ts = time({["year"] = 2016, ["month"] = 5, ["day"] = 25, ["hour"] = 0, ["min"] = 0, ["sec"] = 0})
+	local run, cmd = wowCron.RunNow( "* * * jan-apr * /hello it is in jan-apr.", ts )
+	assertIsNil( run, "This should not run" )
+end
+function test.testMonthNameExpansion_twoMonths_error01()
+	local ts = time({["year"] = 2016, ["month"] = 5, ["day"] = 25, ["hour"] = 0, ["min"] = 0, ["sec"] = 0})
+	local run, cmd = wowCron.RunNow( "* * * febfeb * /hello it is in febfeb.", ts )
+	assertIsNil( run, "This should not run" )
+end
 function test.testCmd_spaceStrip()
 	cmd, parameters = wowCron.DeconstructCmd( "/hello  There is an extra space here." )
 	assertEquals( "There is an extra space here.", parameters )
