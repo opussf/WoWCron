@@ -246,7 +246,9 @@ function wowCron.Expand( value, fieldName )
 	else alias = nil
 	end
 	if alias then
-
+		for val,name in pairs( alias ) do
+			value = string.gsub( value, name, val )
+		end
 	end
 
 	-- Expand * to min-max
