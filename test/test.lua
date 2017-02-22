@@ -356,6 +356,7 @@ function test.testMonthNameExpansion_twoMonths_error01()
 	local ts = time({["year"] = 2016, ["month"] = 5, ["day"] = 25, ["hour"] = 0, ["min"] = 0, ["sec"] = 0})
 	local run, cmd = wowCron.RunNow( "* * * febfeb * /hello it is in febfeb.", ts )
 	assertIsNil( run, "This should not run" )
+end
 function test.testCmd_spaceStrip()
 	cmd, parameters = wowCron.DeconstructCmd( "/hello  There is an extra space here." )
 	assertEquals( "There is an extra space here.", parameters )
