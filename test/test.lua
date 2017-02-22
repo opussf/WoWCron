@@ -29,6 +29,7 @@ function test.before()
 	nextMin = wowCron.lastUpdated+(60-(wowCron.lastUpdated%60))  -- compute the TS of the next top of the minute
 end
 function test.after()
+	wowCron.toRun = {}
 end
 function test.validValues( expected, actual )
 	-- takes 2 tables [val] = 1 and compares them
@@ -355,6 +356,41 @@ function test.testMonthNameExpansion_twoMonths_error01()
 	local ts = time({["year"] = 2016, ["month"] = 5, ["day"] = 25, ["hour"] = 0, ["min"] = 0, ["sec"] = 0})
 	local run, cmd = wowCron.RunNow( "* * * febfeb * /hello it is in febfeb.", ts )
 	assertIsNil( run, "This should not run" )
+function test.testCmd_spaceStrip()
+	cmd, parameters = wowCron.DeconstructCmd( "/hello  There is an extra space here." )
+	assertEquals( "There is an extra space here.", parameters )
+end
+function test.testBuildRunNowList_CreatesEntries()
+	cron_player = {"* * * * * /in item:54233 7" }
+	cron_global = {}
+	wowCron.Command("* * * * * /cron list")
+	wowCron.BuildRunNowList()
+	assertEquals( 2, #wowCron.toRun )
+end
+function test.testRunNowList_runsOnEmptyList()
+	assertEquals( 0, #wowCron.toRun )  -- start with it empty.  Make sure of this
+	wowCron.RunNowList()
+end
+function test.testOnUpdate_runOne()
+	cron_player = {"* * * * * /in item:54233 7" }
+	cron_global = {}
+	wowCron.Command("* * * * * /cron list")
+	wowCron.BuildRunNowList()
+	wowCron.OnUpdate()
+	assertEquals( 1, #wowCron.toRun ) -- one should be left
+end
+function test.testOnUpdate_runTwo()
+	cron_player = {"* * * * * /in item:54233 7" }
+	cron_global = {}
+	wowCron.Command("* * * * * /cron list")
+	wowCron.BuildRunNowList()
+	wowCron.OnUpdate()
+	assertEquals( 1, #wowCron.toRun ) -- one should be left
+	wowCron.OnUpdate()
+	assertEquals( 0, #wowCron.toRun ) -- none left
+end
+function test.testPlayerEventsAreLast()
+	assertEquals( "* * * * * /in item:54233 7", wowCron.events[6])
 end
 
 
