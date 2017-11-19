@@ -1,4 +1,4 @@
-target
-.svn
+target/
+WoWCron-cf/
 
 *.sublime*
