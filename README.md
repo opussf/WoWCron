@@ -32,7 +32,7 @@ The 6 fields of cron are space delimted and are, in order:
 ```
 
 The fields are normally numeric, some implementations support 3 letter abbriviations for month and day of week.
-This does not yet.
+This does not yet work.
 
 There are a few macros for cron, normally starting with the '@' character.
 ```@hourly```, ```@midnight```, ```@first``` are the only macros currently supported.
@@ -79,4 +79,6 @@ Feel free to comment out those lines in the code if you don't like them.
 
 I'm also thinking of spending some time with creating a UI for this.
 The UI addition would change the command line, and would probably double the size of the addon.
+
+
 
