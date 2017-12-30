@@ -1,11 +1,11 @@
 <project name="WoWCron" default="package">
 
-	<property name="build.version" value="1.3"/>
 	<tstamp/>
 	<property file="build.properties"/>
 	<property environment="env"/>
 	<property name="env.BUILD_NUMBER" value=""/>
 	<property name="build.number" value=""/>
+	<property name="addon.dir" location="${ADDONLOC}/${ant.project.name}"/>
 	<!--  Pull git repo info -->
 	<!-- Get the last tag reachable from this branch -->
 	<exec executable="git" dir="." outputproperty="git.tag" failifexecutionfails="false" errorproperty="">
@@ -66,6 +66,15 @@
 	<filter token="VERSION" value="${version.number}"/>
 	<filter token="INTERFACE" value="${INTERFACE}"/>
 
+	<patternset id="packageFiles">
+		<include name="src/*.xml"/>
+		<include name="src/*.toc"/>
+		<include name="src/*.lua"/>
+		<include name="README.md"/>
+		<include name="${working.dir}/*.txt"/>
+	</patternset>
+
+<!-- -->
 	<target name="clean" description="Cleans old builds">
 		<delete dir="target" verbose="true"/>
 	</target>
@@ -82,15 +91,9 @@
 	<target name="package" depends="changelog, test" description="Create a deploy package">
 		<property name="package.dir" location="${working.dir}/${ant.project.name}"/>
 		<delete dir="${package.dir}" verbose="false"/>
-		<copy	todir="${package.dir}" filtering="true">
-			<fileset dir="src">
-				<include name="*.lua"/>
-				<include name="*.toc"/>
-				<include name="*.xml"/>
-				<include name="*.txt"/>
-			</fileset>
-			<fileset dir="${working.dir}">
-				<include name="*.txt"/>
+		<copy	todir="${package.dir}" filtering="true" flatten="true">
+			<fileset dir=".">
+				<patternset refid="packageFiles"/>
 			</fileset>
 		</copy>
 		<zip 	destfile="${target.dir}/${project.zip}"
@@ -101,25 +104,19 @@
 		<echo file="${target.dir}/${project.zip}.md5">${zip.md5} ${project.zip}${line.separator}</echo>
 	</target>
 
-	<target name="web.deploy" description="deploys the web site">
-		<mkdir	dir="${target.dir}/web"/>
-		<zip	destfile="${target.dir}/${ant.project.name}-web.zip"
-				basedir="site"
-				includes="**"/>
-		<delete dir="${target.dir}/web" verbose="true"/>
-	</target>
-
 	<target name="wow" depends="test" description="copy files to currnet wow install">
-		<property name="addon.dir" location="/Applications/World of Warcraft/Interface/Addons/${ant.project.name}"/>
 		<mkdir dir="${addon.dir}"/>
-		<copy todir="${addon.dir}" filtering="true">
-			<fileset dir="src">
-				<include name="*.lua"/>
-				<include name="*.toc"/>
-				<include name="*.xml"/>
-				<include name="Readme.txt"/>
+		<copy todir="${addon.dir}" filtering="true" flatten="true">
+			<fileset dir=".">
+				<patternset refid="packageFiles"/>
 			</fileset>
 		</copy>
+	</target>
+
+	<target name="open" description="open the addon dir in the current wow install">
+		<exec executable="open">
+			<arg value="${addon.dir}"/>
+		</exec>
 	</target>
 
 	<target name="test" description="run unit tests" if="test.check">
