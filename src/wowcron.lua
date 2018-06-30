@@ -57,9 +57,8 @@ function wowCron.OnUpdate()
 	if coroutine.status(wowCron.processThread) ~= "dead" then
 		coroutine.resume(wowCron.processThread)
 	end
-	nowTS = time()
-	local now = date( "*t", nowTS )
-	if (wowCron.lastUpdated < nowTS) and (now.sec == 0) then
+	local nowTS = time()
+	if (wowCron.lastUpdated < nowTS) and (nowTS % 60 == 0) then
 		wowCron.lastUpdated = nowTS
 		wowCron.BuildRunNowList() -- This is where building the list needs to happen.
 		--wowCron.Print("Update: "..#wowCron.toRun)
