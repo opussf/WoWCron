@@ -339,6 +339,24 @@ function wowCron.AddEntry( entry )
 	end
 	wowCron.ParseAll()
 end
+function wowCron.MakeValidReport( param, tableName, cronTable )
+	--print( "cronTable: "..( cronTable and "cronTable" or "nil" ) )
+	if( not tableName ) then
+		wowCron.MakeValidReport( param, "global", cron_global )
+		wowCron.MakeValidReport( param, "player", cron_player )
+		return
+	end
+	wowCron.validReport = wowCron.validReport or {}
+	wowCron.validReport[tableName] = {}
+	for i, entry in ipairs( cronTable ) do
+		--wowCron.validReport[tableName][i] = {}
+		print( i..": "..entry )
+		parsed = { wowCron.Parse( entry ) }
+		print( "size of parsed: "..#parsed )
+
+	end
+end
+
 wowCron.CommandList = {
 	["help"] = {
 		["func"] = wowCron.PrintHelp,
@@ -359,6 +377,10 @@ wowCron.CommandList = {
 	["add"] = {
 		["func"] = wowCron.AddEntry,
 		["help"] = {"<entry>", "Adds an entry. Default action."}
+	},
+	["validate"] = {
+		["func"] = wowCron.MakeValidReport,
+		["help"] = {"", "Show a validation of all current entries."}
 	},
 }
 function wowCron.Command( msg, isGlobal )

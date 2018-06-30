@@ -394,5 +394,45 @@ function test.testPlayerEventsAreLast()
 	assertEquals( "* * * * * /in item:54233 7", wowCron.events[6])
 end
 
+------------------------------------------
+-- validation tests
+function test.testValidate_sayChannel_player_valid_flag()
+	cron_global = {}
+	cron_player = { "* * * * * /s Oh Test!" }
+	wowCron.BuildRunNowList()
+	wowCron.Command( "validate" )
+	assertTrue( wowCron.validReport["player"][1]["valid"] )
+end
+function test.testValidate_sayChannel_player_valid_msg()
+	timeStr = date( "%x %H:%M", time() + 60 )
+	cron_global = {}
+	cron_player = { "* * * * * /s Oh Test!" }
+	wowCron.BuildRunNowList()
+	wowCron.Command( "validate" )
+	assertEquals( "Next run at: "..timeStr, wowCron.validReport["player"][1]["msg"] )
+end
+function test.testValidate_sayChannel_global_valid_flag()
+	cron_global = { "* * * * * /s Oh Test!" }
+	cron_player = {}
+	wowCron.BuildRunNowList()
+	wowCron.Command( "validate" )
+	assertTrue( wowCron.validReport["player"][1]["valid"] )
+end
+function test.testValidate_sayChannel_global_valid_msg()
+	timeStr = date( "%x %H:%M", time() + 60 )
+	cron_global = { "* * * * * /s Oh Test!" }
+	cron_player = {}
+	wowCron.BuildRunNowList()
+	wowCron.Command( "validate" )
+	assertEquals( "Next run at: "..timeStr, wowCron.validReport["player"][1]["msg"] )
+end
+function test.testValidate_invalidCron_player_valid_flag()
+	cron_global = {}
+	cron_player = { "* * * * /say Hi" }
+	wowCron.BuildRunNowList()
+	wowCron.Command( "validate" )
+	assertIsNil( wowCron.validReport["player"][1]["valid"] )
+end
+
 
 test.run()

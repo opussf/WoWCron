@@ -2,6 +2,34 @@
 
 "* * * * * /run wowCron.Print(date(\"%H:%M\"))", -- [12]
 
+## validate
+
+Run a validation on new entries.
+Report:
+   * when the next run will be, or error
+   * scan the command, check for:
+      * Properly formatted cron string
+      * /run command (nothing else parsed)
+      * valid slash command ( search emotes and slash commands and chat channels )
+
+Validate new commands
+
+What should a failed entry do?
+   * Simply report?
+      * "* * * * /s Bleh" - invalid crontab format
+      * "* * * * * /s Bleh" - "  valid - <next time>"
+      * "* * * * * /yuus" - invalid /command
+   * build a report
+      * report = {
+            ["global"] = {
+                  [1] = { ["valid"] = nil, ["msg"] = "bad crontab format" },
+                  [2] = { ["valid"] = true, ["msg"] = "Next run at: <next time>" },
+                  [3] = { ["valid"] = nil, ["msg"] = "bad command" }
+            },
+            ["player"] = { }
+         }
+      * print the report
+
 ## coroutine
 
 Create a FIFO, process the FIFO as a coroutine
