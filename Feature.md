@@ -2,6 +2,14 @@
 
 "* * * * * /run wowCron.Print(date(\"%H:%M\"))", -- [12]
 
+## memoryLeak
+
+Had a horrible usage of memory.
+Using ```date( "*t" )``` is NOT something to do in the OnUpdate method.
+This creates a new table everytime, and it takes a while for the built-in GC to recover this.
+
+I don't see a way to pass an already existing table to ```date( "*t" )```, but I do see that ```date( "%S" )``` does what I'm looking for.
+
 ## coroutine
 
 Create a FIFO, process the FIFO as a coroutine
