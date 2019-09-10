@@ -15,6 +15,8 @@ require "wowcron"
 --require "INEEDOptions"
 
 function test.before()
+	at_player = {}
+	at_global = {}
 	cron_player = {"* * * * * /in item:54233 7" }
 	cron_global = {
 		"* 0 * * * /happy",
@@ -393,6 +395,62 @@ end
 function test.testPlayerEventsAreLast()
 	assertEquals( "* * * * * /in item:54233 7", wowCron.events[6])
 end
+----------
+-- AT
+----------
+function test.testAT_hasCommand()
+	wowCron.AtCommand( "" )
+end
+function test.testAT_AddACommand_900AM()
+	target = date( "*t" )
+	if( target.hour >= 9 ) then
+		target = date( "*t", time()+86400 ) -- get tomorrow to reset time back to the desired target
+	end
+	target.hour = 9; target.min = 0; target.sec = 0;
+	targetTS = time( target )
+	wowCron.AtCommand( "9:00 AM /wave" )
+	assertEquals( "/wave", at_player[targetTS][1] )
+end
+function test.testAT_AddGlobalCommand_900()
+	target = date( "*t" )
+	if( target.hour >= 9 ) then
+		target = date( "*t", time()+86400 ) -- get tomorrow to reset time back to the desired target
+	end
+	target.hour = 9; target.min = 0; target.sec = 0;
+	targetTS = time( target )
+	wowCron.AtCommand( "9:00 AM /gawk" )
+	assertEquals( "/gawk", at_player[targetTS][1] )
+end
 
+function test.testAT_AddGlobalCommand_1130()
+	target = date( "*t" )
+	if( target.hour >= 11 and target.min >=30 ) then
+		target = date( "*t", time() + 86400 )
+	end
+	target.hour = 11; target.min = 30; target.sec = 0;
+	targetTS = time( target )
+	wowCron.AtCommand( "global 1130 /silly" )
+	assertEquals( "/silly", at_global[targetTS][1] )
+end
+function test.testAT_Named_noon()
+	target = date( "*t" )
+	if( target.hour >= 12 ) then
+		target = date( "*t", time()+86400 ) -- get tomorrow to reset time back to the desired target
+	end
+	target.hour = 12; target.min = 0; target.sec = 0;
+	targetTS = time( target )
+	wowCron.AtCommand( "noon /giggle" )
+	assertEquals( "/giggle", at_player[targetTS][1] )
+end
+function test.testAT_Named_midnight()
+	target = date( "*t" )
+	if( target.hour >= 0 ) then
+		target = date( "*t", time()+86400 ) -- get tomorrow to reset time back to the desired target
+	end
+	target.hour = 0; target.min = 0; target.sec = 0;
+	targetTS = time( target )
+	wowCron.AtCommand( "midnight /sleep" )
+	assertEquals( "/sleep", at_player[targetTS][1] )
+end
 
 test.run()
