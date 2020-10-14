@@ -1,0 +1,16 @@
+For @first...
+
+At starttime, capture the start date. Add 60 seconds to it, push that pattern into the macros table.
+
+@first might expand into '6 13 9 9 *'
+
+
+For others:
+connect a WoW event with a macro, and a list of
+
+
+	"@first /run LoggingCombat(true)", -- [25]
+	"* * * * * /script if LoggingCombat()==false then print(\"WARNING: Not logging combat\");end", -- [28]
+
+
+	"* * * * * /script print( date(\"%X : \")..Rested.me.iLvl )", -- [20]

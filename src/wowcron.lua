@@ -59,7 +59,7 @@ function wowCron.OnLoad()
 end
 function wowCron.OnUpdate()
 	-- if the toRun list has items, this should not be dead.
-	if coroutine.status(wowCron.processThread) ~= "dead" then
+	if wowCron.processThread and coroutine.status(wowCron.processThread) ~= "dead" then
 		coroutine.resume(wowCron.processThread)
 	end
 	local nowTS = time()
@@ -415,15 +415,46 @@ function wowCron.AtAddEntry( msg )
 	msgItem, msg = strsplit( " ", msg, 2 )
 
 	while( msgItem and msg ) do -- only parse as part of the time string.  A command starts with a "/"
-		print( "-->"..msgItem.."<--:".. msg)
+		print( "-->"..msgItem.."<--:".. msg..":" )
+		-- find a date.  Do this first because the time string is 'funky'
+		_, _, month, split, day, year = strfind( msgItem, "([%d]?%d)([/.-])([%d%d]+)[/]?([%d%d]*)" )
+		-- date of the form MMDD[CC]YY, MM/DD/[CC]YY, DD.MM.[CC]YY or [CC]YY-MM-DD.
+
+		if( split == "." ) then
+			d = day
+			day = month
+			month = d
+		end
+		if( split == "-" ) then
+			y = year
+			year = month
+			month = day
+			day = y
+		end
+		print( ( month or "nil").."/"..(day or "nil").."/"..(year or "nil").." split:"..( split or "nil" ) )
+		if( split ) then  -- having split says this is a date.
+			targetTime.month = month
+			targetTime.day = day
+			if( tonumber( year ) < 100 ) then
+				century = math.floor( targetTime.year / 100 ) * 100
+				year = century + year
+			end
+			targetTime.year = year
+		end
+
+
 		-- find and replace 'shortcut' string
 		msgItem = shortcuts[msgItem] or msgItem
+
+		--break
+
+
 		-- find a time string
 		if( tonumber( msgItem ) and tonumber( msgItem ) < 1000 ) then -- if the item is a number less than 1000, add a "0" to the start.
 			msgItem = "0"..msgItem
 		end
 		_, _, hourIn, minIn, secIn = strfind( msgItem, "([%d]?%d)[:]?([%d%d]+)[:]?([%d%d]*)" )
-		--print( ( hourIn or "nil")..":"..( minIn or "nil" )..":"..( secIn or "nil" ) )
+		print( ( hourIn or "nil")..":"..( minIn or "nil" )..":"..( secIn or "nil" ) )
 		if( hourIn ) then
 			targetTime.hour = tonumber( hourIn )
 		end
@@ -440,19 +471,18 @@ function wowCron.AtAddEntry( msg )
 			targetTime.hour = targetTime.hour + 12
 		end
 
-		_, _, month, day, year = strfind( msgItem, "([%d]?%d)/([%d%d]+)[/]?([%d%d]*)" )
 
-		--print( ( month or "nil").."/"..(day or "nil").."/"..(year or "nil") )
+
+
 		print( date( "-->%x %X", time( targetTime ) ) )
-
-
-		msgItem, msg = strsplit( " ", msg )
+		msgItem, msg = strsplit( " ", msg, 2 )
 
 	end
 	print( "Final -->"..msgItem.."<--" )
 	targetTS = time( targetTime )
 	if( targetTS < time()) then
 		targetTS = targetTS + 86400
+		print( date( "-->%x %X", targetTS ) )
 	end
 	atTable = wowCron.global and at_global or at_player
 	atTable[targetTS] = atTable[targetTS] or {}

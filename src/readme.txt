@@ -22,6 +22,7 @@ Examples:
 /cron add @first /cron list
 
 
+
 Specials:
 Turn on the 'debug' setting to see what is happening when a pattern should match:
 ```/script wowCron.debug=true```
