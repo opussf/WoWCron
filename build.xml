@@ -106,9 +106,15 @@
 
 	<target name="wow" depends="test" description="copy files to currnet wow install">
 		<mkdir dir="${addon.dir}"/>
-		<copy todir="${addon.dir}" filtering="true" flatten="true">
-			<fileset dir=".">
-				<patternset refid="packageFiles"/>
+		<delete>
+			<fileset dir="${addon.dir}" includes="*.toc"/>
+		</delete>
+		<copy todir="${addon.dir}" filtering="true" verbose="true">
+			<fileset dir="src">
+				<include name="*.lua"/>
+				<include name="*.toc"/>
+				<include name="*.xml"/>
+				<include name="Readme.txt"/>
 			</fileset>
 		</copy>
 		<echo>Deployed ${version.number} locally</echo>
@@ -126,7 +132,7 @@
 			<arg value="test.lua"/>
 		</exec>
 		<move todir="${report.dir}" file="${test.dir}/testOut.xml"/>
-		<fail message="The tests failed. Please see the output for details.">
+		<fail message="The tests failed. Please see the output for details." status="${testResult}">
 			<condition>
 				<not>
 					<equals arg1="${testResult}" arg2="0"/>
