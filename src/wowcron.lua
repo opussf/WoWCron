@@ -81,7 +81,7 @@ function wowCron.PLAYER_ENTERING_WORLD()
 	wowCron.macros["@first"] = wowCron.BuildFirstCronMacro()
 end
 function wowCron.PLAYER_ALIVE()
-	print( "PLAYER_ALIVE!" )
+	-- @todo: set this up to do @first things.
 end
 -- Support Code
 function wowCron.BuildFirstCronMacro()
