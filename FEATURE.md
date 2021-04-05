@@ -1,5 +1,10 @@
 # Features
 
+## Error
+
+If and error is detected when an entry is added, report to the user.
+
+
 "* * * * * /run wowCron.Print(date(\"%H:%M\"))", -- [12]
 
 ## memoryLeak
