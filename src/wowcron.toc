@@ -1,4 +1,4 @@
-## Title: WoWCron v@VERSION@
+## Title: WoWCron
 ## Interface: @INTERFACE@
 ## Notes: Cron for WoW. (@VERSION@)
 ## Author: opussf
