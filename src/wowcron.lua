@@ -1,6 +1,7 @@
-WOWCRON_MSG_ADDONNAME = "WoWCron";
-WOWCRON_MSG_VERSION   = GetAddOnMetadata(WOWCRON_MSG_ADDONNAME,"Version");
-WOWCRON_MSG_AUTHOR    = "opussf";
+WOWCRON_SLUG, wowCron = ...
+WOWCRON_MSG_ADDONNAME = GetAddOnMetadata(WOWCRON_SLUG,"Title")
+WOWCRON_MSG_VERSION   = GetAddOnMetadata(WOWCRON_SLUG,"Version")
+WOWCRON_MSG_AUTHOR    = GetAddOnMetadata(WOWCRON_SLUG, "Author" )
 
 -- Colours
 COLOR_RED = "|cffff0000";
@@ -14,7 +15,6 @@ COLOR_GOLD = "|cffcfb52b";
 COLOR_NEON_BLUE = "|cff4d4dff";
 COLOR_END = "|r";
 
-wowCron = {}
 cron_global = {}
 cron_player = {}
 cron_knownSlashCmds = {}
