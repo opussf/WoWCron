@@ -326,32 +326,28 @@ function test.test_Macro_First()
 	wowCron.lastUpdated = 0
 	wowCron.BuildRunNowList()
 	wowCron.OnUpdate()
-	-- for k,v in pairs( wowCron.crons ) do
-	-- 	print( "--->", k, v )
-	-- end
-	-- for e, s in pairs( wowCron.eventCmds ) do
-	-- 	print("EVENT ("..e.."):")
-	-- 	for _, cmd in pairs( wowCron.eventCmds[e] ) do
-	-- 		print( "---<", _, cmd )
-	-- 	end
-	-- end
-	print( "num in toRun: "..#wowCron.toRun )
 	wowCron.LOADING_SCREEN_DISABLED()
-	print( "num in toRun: "..#wowCron.toRun )
+	--print( "num in toRun: "..#wowCron.toRun )
 	assertTrue( wowCron.hasFirstBeenRun )
+	assertIsNil( wowCron_Frame.Events["LOADING_SCREEN_DISABLED"], "LOADING_SCREEN_DISABLED should not be a registerd event anymore." )
 	wowCron.OnUpdate()
-	print( "num in toRun: "..#wowCron.toRun )
 	wowCron.OnUpdate()
-	print( "num in toRun: "..#wowCron.toRun )
 	wowCron.OnUpdate()
-	print( "num in toRun: "..#wowCron.toRun )
+	assertEquals( 0, #wowCron.toRun, "toRun list should be empty by now." )
 end
 function test.test_Macro_Gold()
+	wowCron.toRun = {}
 	wowCron.Command("add @gold /snap")
 	wowCron.BuildRunNowList()
 	assertTrue( wowCron.PLAYER_MONEY, "PLAYER_MONEY event function should exist" )
+	assertTrue( wowCron_Frame.Events["PLAYER_MONEY"], "PLAYER_MONEY should be a registerd event" )
 	wowCron.PLAYER_MONEY()
-	assertEquals( 1, #wowCron.toRun )
+	foundInToRun = false
+	for _, v in pairs( wowCron.toRun ) do
+		if v == "/snap" then foundInToRun = true
+		end
+	end
+	assertTrue( foundInToRun, "/snap should be found in the list of events to do." )
 end
 function test.testMonthNameExpansion_oneMonth_yes()
 	local ts = time({["year"] = 2016, ["month"] = 5, ["day"] = 25, ["hour"] = 0, ["min"] = 0, ["sec"] = 0})

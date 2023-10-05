@@ -88,10 +88,9 @@ end
 function wowCron.LOADING_SCREEN_DISABLED()
 	-- this event is also a bit special.
 	print( "LOADING_SCREEN_DISABLED" )
-	print( wowCron.hasFirstBeenRun and "true" or "false" )
+	print( wowCron.hasFirstBeenRun and "I've been run" or "I've NOT been run" )
 	print( wowCron.eventCmds["LOADING_SCREEN_DISABLED"] or "no commands for this event" )
 	if not wowCron.hasFirstBeenRun and wowCron.eventCmds["LOADING_SCREEN_DISABLED"] then
-		print( "in if")
 		for _, cmd in pairs( wowCron.eventCmds["LOADING_SCREEN_DISABLED"] ) do
 			print("adding cmd to toRun: "..cmd)
 			table.insert( wowCron.toRun, cmd )
@@ -233,23 +232,14 @@ function wowCron.RunNow( cmdIn, ts )
 	-- do the macro expansion here, since I want to return true for @first if within the first ~60 seconds of being run.
 	local macro, cmd = strmatch( cmdIn, "^(@%S+)%s+(.*)$" )
 	if macro then
-		print( "MACRO: "..macro )
+		--print( "MACRO: "..macro )
 		if wowCron.macros[macro] then -- expand the macro
 			if wowCron.macros[macro].cron then
-				print( "CRON: "..wowCron.macros[macro].cron )
+				--print( "CRON: "..wowCron.macros[macro].cron )
 				cmdIn = wowCron.macros[macro].cron.." "..cmd
 			elseif wowCron.macros[macro].event then
-				print( "EVENT: "..wowCron.macros[macro].event )
-				print( "239: ", wowCron.events )
-				for k,v in pairs( wowCron.events ) do
-					print( k,v )
-				end
-				print( "243:", wowCron.macros[macro].event )
-				print( wowCron.events[wowCron.macros[macro].event] )
-				wowCron.events[wowCron.macros[macro].event] = wowCron.events[wowCron.macros[macro].event] or {}
-				tinsert( wowCron.events[wowCron.macros[macro].event], cmd )
-				print( ">", wowCron.events[wowCron.macros[macro].event] )
-				print( "Register >"..cmd.."< to run for event: "..macro.." ("..wowCron.macros[macro].event..")")
+				--print( "EVENT: "..wowCron.macros[macro].event )
+				--print( "Register >"..cmd.."< to run for event: "..macro.." ("..wowCron.macros[macro].event..")")
 				wowCron.EventCmd( wowCron.macros[macro].event, cmd )
 			end
 		else
