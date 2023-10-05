@@ -1,25 +1,29 @@
-WOWCRON_MSG_ADDONNAME = "WoWCron";
-WOWCRON_MSG_VERSION   = GetAddOnMetadata(WOWCRON_MSG_ADDONNAME,"Version");
-WOWCRON_MSG_AUTHOR    = "opussf";
+WOWCRON_SLUG, wowCron = ...
+WOWCRON_MSG_ADDONNAME = GetAddOnMetadata( WOWCRON_SLUG, "Title" )
+WOWCRON_MSG_VERSION   = GetAddOnMetadata( WOWCRON_SLUG, "Version")
+WOWCRON_MSG_AUTHOR    = GetAddOnMetadata( WOWCRON_SLUG, "Author" )
 
 -- Colours
-COLOR_RED = "|cffff0000";
-COLOR_GREEN = "|cff00ff00";
-COLOR_BLUE = "|cff0000ff";
-COLOR_PURPLE = "|cff700090";
-COLOR_YELLOW = "|cffffff00";
-COLOR_ORANGE = "|cffff6d00";
-COLOR_GREY = "|cff808080";
-COLOR_GOLD = "|cffcfb52b";
-COLOR_NEON_BLUE = "|cff4d4dff";
-COLOR_END = "|r";
+COLOR_RED = "|cffff0000"
+COLOR_GREEN = "|cff00ff00"
+COLOR_BLUE = "|cff0000ff"
+COLOR_PURPLE = "|cff700090"
+COLOR_YELLOW = "|cffffff00"
+COLOR_ORANGE = "|cffff6d00"
+COLOR_GREY = "|cff808080"
+COLOR_GOLD = "|cffcfb52b"
+COLOR_NEON_BLUE = "|cff4d4dff"
+COLOR_END = "|r"
 
 wowCron = {}
 cron_global = {}
+cron_groups = {}  --
 cron_player = {}
 cron_knownSlashCmds = {}
 cron_knownEmotes = {}
-wowCron.events = {}  -- [nextTS] = {[1]={['event'] = 'runME', ['fullEvent'] = '* * * * * runMe'}}
+wowCron.events = {}
+wowCron.eventCmds = {}
+wowCron.crons = {}  -- [nextTS] = {[1]={['event'] = 'runME', ['fullEvent'] = '* * * * * runMe'}}
 -- meh, ['fullEvent'] = ts
 -- meh, meh...  [1] = '* * * * * runMe', [2] = "* * * * * other"
 --wowCron.nextEvent = 0
@@ -33,8 +37,10 @@ wowCron.ranges = {
 wowCron.fieldNames = { "min", "hour", "day", "month", "wday" }
 wowCron.monthNames = { "jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec" }
 wowCron.macros = {
-	["@hourly"]   = "0 * * * *",
-	["@midnight"] = "0 0 * * *",
+	["@hourly"]   = { ["cron"] = "0 * * * *" },
+	["@midnight"] = { ["cron"] = "0 0 * * *" },
+	["@first"] = { ["event"] = "LOADING_SCREEN_DISABLED" },
+	["@gold"] = { ["event"] = "PLAYER_MONEY" },
 }
 wowCron.chatChannels = {
 	["/s"]    = "SAY",
@@ -51,7 +57,7 @@ function wowCron.OnLoad()
 	SlashCmdList["CRON"] = function(msg) wowCron.Command(msg); end
 	wowCron_Frame:RegisterEvent( "ADDON_LOADED" )
 	wowCron_Frame:RegisterEvent( "PLAYER_ENTERING_WORLD" )
-	wowCron_Frame:RegisterEvent( "PLAYER_ALIVE" )
+	wowCron_Frame:RegisterEvent( "LOADING_SCREEN_DISABLED" )
 end
 function wowCron.OnUpdate()
 	-- if there are still events in the queue to process
@@ -67,30 +73,63 @@ function wowCron.OnUpdate()
 end
 function wowCron.ADDON_LOADED()
 	-- Unregister the event for this method.
-	wowCron_Frame:UnregisterEvent("ADDON_LOADED")
+	wowCron_Frame:UnregisterEvent( "ADDON_LOADED" )
 	wowCron.lastUpdated = time()
 	wowCron.ParseAll()
 	wowCron.BuildSlashCommands()
-	--wowCron.Print("Loaded")
 end
 function wowCron.PLAYER_ENTERING_WORLD()
 	-- since this only gets called once, the can be where the @first macro is created.
-	wowCron_Frame:UnregisterEvent("PLAYER_ENTERING_WORLD")
+	wowCron_Frame:UnregisterEvent( "PLAYER_ENTERING_WORLD" )
 	wowCron.BuildSlashCommands()
-	wowCron.started = time()
-	wowCron.macros["@first"] = wowCron.BuildFirstCronMacro()
+	--wowCron.started = time()
+	--wowCron.macros["@first"] = wowCron.BuildFirstCronMacro()
 end
-function wowCron.PLAYER_ALIVE()
-	-- @todo: set this up to do @first things.
+function wowCron.LOADING_SCREEN_DISABLED()
+	-- this event is also a bit special.
+	print( "LOADING_SCREEN_DISABLED" )
+	print( wowCron.hasFirstBeenRun and "true" or "false" )
+	print( wowCron.eventCmds["LOADING_SCREEN_DISABLED"] or "no commands for this event" )
+	if not wowCron.hasFirstBeenRun and wowCron.eventCmds["LOADING_SCREEN_DISABLED"] then
+		print( "in if")
+		for _, cmd in pairs( wowCron.eventCmds["LOADING_SCREEN_DISABLED"] ) do
+			print("adding cmd to toRun: "..cmd)
+			table.insert( wowCron.toRun, cmd )
+		end
+		wowCron.hasFirstBeenRun = true
+	end
+	wowCron_Frame:UnregisterEvent( "LOADING_SCREEN_DISABLED" )
 end
 -- Support Code
-function wowCron.BuildFirstCronMacro()
-	-- returns a specific cron for the next minute based on wowCron.started
-	local tt = date( "*t", wowCron.started + 60 )
-	return (string.format("%s %s %s %s *", tt.min, tt.hour, tt.day, tt.month))
+-----------------------------------------
+function wowCron.EventCmd( event, cmd )
+	-- event: event name to register
+	-- cmd  : command to do at that event
+	if( event == "ADDON_LOADED" or event == "VARIABLES_LOADED" ) then  -- don't let these be registereed.
+		return
+	end
+	-- record cmd in table
+	if not wowCron.eventCmds[event] then
+		wowCron.eventCmds[event] = {}
+	end
+	tinsert( wowCron.eventCmds[event], cmd )
+
+	-- create event code if it does not exist
+	if not wowCron[event] then
+		wowCron[event] = function( ... )
+			if wowCron.eventCmds[event] then
+				for _, cmd in pairs( wowCron.eventCmds[event] ) do
+					table.insert( wowCron.toRun, cmd )
+				end
+			else
+				wowCron.Print( "There are no commands registerd for this event: ("..event..")" )
+			end
+		end
+	end
+	wowCron_Frame:RegisterEvent( event )
 end
 function wowCron.BuildRunNowList()
-	for _, cron in pairs( wowCron.events ) do
+	for _, cron in pairs( wowCron.crons ) do
 		runNow, cmd = wowCron.RunNow( cron )
 		if runNow then
 			--slash, parameters = wowCron.DeconstructCmd( cmd )
@@ -194,8 +233,25 @@ function wowCron.RunNow( cmdIn, ts )
 	-- do the macro expansion here, since I want to return true for @first if within the first ~60 seconds of being run.
 	local macro, cmd = strmatch( cmdIn, "^(@%S+)%s+(.*)$" )
 	if macro then
+		print( "MACRO: "..macro )
 		if wowCron.macros[macro] then -- expand the macro
-			cmdIn = wowCron.macros[macro].." "..cmd
+			if wowCron.macros[macro].cron then
+				print( "CRON: "..wowCron.macros[macro].cron )
+				cmdIn = wowCron.macros[macro].cron.." "..cmd
+			elseif wowCron.macros[macro].event then
+				print( "EVENT: "..wowCron.macros[macro].event )
+				print( "239: ", wowCron.events )
+				for k,v in pairs( wowCron.events ) do
+					print( k,v )
+				end
+				print( "243:", wowCron.macros[macro].event )
+				print( wowCron.events[wowCron.macros[macro].event] )
+				wowCron.events[wowCron.macros[macro].event] = wowCron.events[wowCron.macros[macro].event] or {}
+				tinsert( wowCron.events[wowCron.macros[macro].event], cmd )
+				print( ">", wowCron.events[wowCron.macros[macro].event] )
+				print( "Register >"..cmd.."< to run for event: "..macro.." ("..wowCron.macros[macro].event..")")
+				wowCron.EventCmd( wowCron.macros[macro].event, cmd )
+			end
 		else
 			print("Invalid macro in: "..cmdIn)
 			return
@@ -277,15 +333,15 @@ function wowCron.Expand( value, fieldName )
 end
 function wowCron.ParseAll()
 	-- Only when starting, or changing
-	-- Player specific events should happen last.
-	wowCron.events = {}
-	-- global events
+	-- Player specific crons should happen last.
+	wowCron.crons = {}
+	-- global crons
 	for _, cmd in ipairs(cron_global) do
-		tinsert( wowCron.events, cmd )
+		tinsert( wowCron.crons, cmd )
 	end
-	-- player specific events
+	-- player specific crons
 	for _, cmd in ipairs(cron_player) do
-		tinsert( wowCron.events, cmd )
+		tinsert( wowCron.crons, cmd )
 	end
 end
 function wowCron.Parse( cron )

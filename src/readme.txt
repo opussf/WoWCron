@@ -12,7 +12,7 @@
 
 <command> = "/<addon command>" | "/<emote token>" | "/run | /script" <lua code> | "/say | /guild | /yell"
 
-/cron [global] <add | list | rm <index>> <cron entry>
+/cron [global] <add <cron entry>| list | rm <index>>
 
 Examples:
 /cron global list
