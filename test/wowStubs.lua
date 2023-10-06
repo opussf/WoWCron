@@ -1,7 +1,7 @@
 -----------------------------------------
 -- Author  :  Opussf
--- Date    :  $Date:$
--- Revision:  1.3
+-- Date    :  May 20 2023
+-- Revision:  9.0.4-4-g4dbc6c4
 -----------------------------------------
 -- These are functions from wow that have been needed by addons so far
 -- Not a complete list of the functions.
@@ -9,6 +9,8 @@
 -- This is not intended to replace WoWBench, but to provide a stub structure for
 --     automated unit tests.
 
+settings = {
+}
 actionLog = {
 }
 -- append actions to the log to track actions that may not have an other sideeffects.
@@ -51,10 +53,12 @@ onCursor = {}
 globals = {}
 accountExpansionLevel = 4   -- 0 to 5
 -- registeredPrefixes - populated by the RegisterAddonMessagePrefix( prefix )
+unitSpeeds = { ["player"] = 0 }
 
 myStatistics = {
 	[60] = 42  -- 60 = deaths
 }
+myLocale = "enUS"
 
 registeredPrefixes = {}
 
@@ -108,14 +112,14 @@ TaxiNodes = {
 	{["name"] = "Ironforge", ["type"] = "NONE", ["hops"] = 1, ["cost"]=1000},
 }
 Currencies = {
-	["1"] = { ["name"] = "Currency Token Test Token 4", ["texturePath"] = "", ["weeklyMax"] = 0, ["totalMax"] = 0, isDiscovered = false, ["link"] = "|cffffffff|Hcurrency:1|h[Currency Token Test Token 4]|h|r"},
-	["384"] = { ["name"] = "Dwarf Archaeology Fragment", ["texturePath"] = "", ["weeklyMax"] = 0, ["totalMax"] = 200, isDiscovered = true, ["link"] = "|cff9d9d9d|Hcurrency:384:0:0:0:0:0:0:0:80:0:0|h[Dwarf Archaeology Fragment]|h|r"},
-	["390"] = { ["name"] = "Conquest", ["texturePath"] = "", ["weeklyMax"] = 0, ["totalMax"] = 0, isDiscovered = true, ["link"] = ""},
-	["392"] = { ["name"] = "Honor",    ["texturePath"] = "", ["weeklyMax"] = 0, ["totalMax"] = 0, isDiscovered = true, ["link"] = ""},
-	["395"] = { ["name"] = "Justice",  ["texturePath"] = "", ["weeklyMax"] = 0, ["totalMax"] = 0, isDiscovered = true, ["link"] = ""},
-	["396"] = { ["name"] = "Valor",    ["texturePath"] = "", ["weeklyMax"] = 0, ["totalMax"] = 0, isDiscovered = true, ["link"] = ""},
-	["402"] = { ["name"] = "Ironpaw Token", ["texturePath"] = "", ["weeklyMax"] = 0, ["totalMax"] = 0, isDiscovered = true, ["link"] = "|cff9d9d9d|Hcurrency:402:0:0:0:0:0:0:0:80:0:0|h[Ironpaw Token]|h|r"},
-	["703"] = { ["name"] = "Fictional Currency", ["texturePath"] = "", ["weeklyMax"] = 1000, ["totalMax"] = 4000, isDiscovered = true, ["link"] = "|cffffffff|Hcurrency:703|h[Fictional Currency]|h|r"},
+	[1] = { ["name"] = "Currency Token Test Token 4", ["texturePath"] = "", ["weeklyMax"] = 0, ["totalMax"] = 0, isDiscovered = false, ["link"] = "|cffffffff|Hcurrency:1|h[Currency Token Test Token 4]|h|r"},
+	[384] = { ["name"] = "Dwarf Archaeology Fragment", ["texturePath"] = "", ["weeklyMax"] = 0, ["totalMax"] = 200, isDiscovered = true, ["link"] = "|cff9d9d9d|Hcurrency:384:0:0:0:0:0:0:0:80:0:0|h[Dwarf Archaeology Fragment]|h|r"},
+	[390] = { ["name"] = "Conquest", ["texturePath"] = "", ["weeklyMax"] = 0, ["totalMax"] = 0, isDiscovered = true, ["link"] = ""},
+	[392] = { ["name"] = "Honor",    ["texturePath"] = "", ["weeklyMax"] = 0, ["totalMax"] = 0, isDiscovered = true, ["link"] = ""},
+	[395] = { ["name"] = "Justice",  ["texturePath"] = "", ["weeklyMax"] = 0, ["totalMax"] = 0, isDiscovered = true, ["link"] = ""},
+	[396] = { ["name"] = "Valor",    ["texturePath"] = "", ["weeklyMax"] = 0, ["totalMax"] = 0, isDiscovered = true, ["link"] = ""},
+	[402] = { ["name"] = "Ironpaw Token", ["texturePath"] = "", ["weeklyMax"] = 0, ["totalMax"] = 0, isDiscovered = true, ["link"] = "|cff9d9d9d|Hcurrency:402:0:0:0:0:0:0:0:80:0:0|h[Ironpaw Token]|h|r"},
+	[703] = { ["name"] = "Fictional Currency", ["texturePath"] = "", ["weeklyMax"] = 1000, ["totalMax"] = 4000, isDiscovered = true, ["link"] = "|cffffffff|Hcurrency:703|h[Fictional Currency]|h|r"},
 }
 ArchaeologyCurrencies = {"999",}
 MerchantInventory = {
@@ -126,7 +130,7 @@ MerchantInventory = {
 	{["id"] = "49927", ["cost"] = 0, ["quantity"] = 1, ["isUsable"] = 1,
 		["currencies"] = {{["id"] = "49916", ["type"] = "item", ["quantity"] = 1},}},  -- Lovely Charm Bracelet
 	{["id"] = "74661", ["cost"] = 0, ["quantity"] = 1, ["isUsable"] = 1,
-		["currencies"] = {{["id"] = "402", ["type"] = "currency", ["quantity"] = 1},}},
+		["currencies"] = {{["id"] = 402, ["type"] = "currency", ["quantity"] = 1},}},
 	{["id"] = "85216", ["cost"] = 2500, ["quantity"] = 1, ["isUsable"] = nil},
 }
 TradeSkillItems = {
@@ -210,6 +214,10 @@ globals.FACTION_STANDING_LABEL5 = "Friendly"
 globals.FACTION_STANDING_LABEL6 = "Honored"
 globals.FACTION_STANDING_LABEL7 = "Revered"
 globals.FACTION_STANDING_LABEL8 = "Exalted"
+
+COMBATLOG_OBJECT_AFFILIATION_OUTSIDER = 8
+COMBATLOG_XPGAIN_FIRSTPERSON = "%s dies, you gain %d experience."
+COMBATLOG_XPGAIN_EXHAUSTION1 = "%s dies, you gain %d experience. (%s exp %s bonus)"
 
 --			TT.fName, TT.fDescription, TT.fStandingId, TT.fBottomValue, TT.fTopValue, TT.fEarnedValue, TT.fAtWarWith,
 --					TT.fCanToggleAtWar, TT.fIsHeader, TT.fIsCollapsed, TT.fIsWatched, TT.isChild, TT.factionID,
@@ -387,11 +395,15 @@ Frame = {
 		["GetHeight"] = function(self) return( self.height ); end,
 		["CreateFontString"] = function(self, ...) return(CreateFontString(...)) end,
 
-		["SetMinMaxValues"] = function() end,
-		["SetValue"] = function() end,
+		["SetMinMaxValues"] = function(self, min, max) self.min=min; self.max=max; end,
+		["SetValue"] = function(self, value) self.value=value end,
 		["SetStatusBarColor"] = function() end,
 		["SetScript"] = function() end,
 		["SetAttribute"] = function() end,
+
+		["SetChecked"] = function() end,
+		["SetText"] = function(self, textIn) self.textValue = textIn; end,
+		["GetText"] = function(self) return( self.textValue ); end,
 }
 FrameGameTooltip = {
 		["HookScript"] = function( self, callback ) end,
@@ -405,9 +417,24 @@ FrameGameTooltip = {
 			_G[frameName.."TextLeft4"] = CreateFontString(frameName.."TextLeft4")
 		end,
 }
+        -- None = 0
+        -- Warrior = 1
+        -- Paladin = 2
+        -- Hunter = 3
+        -- Rogue = 4
+        -- Priest = 5
+        -- DeathKnight = 6
+        -- Shaman = 7
+        -- Mage = 8
+        -- Warlock = 9
+        -- Monk = 10
+        -- Druid = 11
+        -- Demon Hunter = 12
 Units = {
 	["player"] = {
 		["class"] = "Warlock",
+		["classCAPS"] = "WARLOCK",
+		["classIndex"] = 9,
 		["faction"] = {"Alliance", "Alliance"},
 		["name"] = "testPlayer",
 		["race"] = "Human",
@@ -419,6 +446,8 @@ Units = {
 	},
 	["sameRealmUnit"] = {
 		["class"] = "Warrior",
+		["classCAPS"] = "WARRIOR",
+		["classIndex"] = 1,
 		["faction"] = {"Alliance", "Alliance"},
 		["name"] = "sameRealmPlayer",
 		["race"] = "Gnome",
@@ -428,6 +457,8 @@ Units = {
 	},
 	["coalescedRealmUnit"] = {
 		["class"] = "Monk",
+		["classCAPS"] = "MONK",
+		["classIndex"] = 10,
 		["faction"] = {"Alliance", "Alliance"},
 		["name"] = "coalescedUnit",
 		["race"] = "Pandarian",
@@ -436,6 +467,8 @@ Units = {
 	},
 	["connectedRealmUnit"] = {
 		["class"] = "Mage",
+		["classCAPS"] = "MAGE",
+		["classIndex"] = 8,
 		["faction"] = {"Alliance", "Alliance"},
 		["name"] = "connectedUnit",
 		["realm"] = "connectedRealm",
@@ -732,6 +765,9 @@ function GetAchievementNumCriteria( achievementID )
 		return #Achievements[achievementID]["criteria"]
 	end
 end
+function GetSpecialization()
+	return 2
+end
 function GetStatistic( statID )
 	-- https://wow.gamepedia.com/API_GetStatistic
 
@@ -778,9 +814,19 @@ function GetCoinTextureString( copperIn, fontHeight )
 				(copper and copper.."C"))
 	end
 end
-function GetContainerItemLink( bagId, slotId )
+
+
+C_Container = {}
+C_Container.SortBagsRightToLeft = false -- this is normal
+function C_Container.GetContainerItemInfo( bagId, slotId )
 end
-function GetContainerNumFreeSlots( bagId )
+function C_Container.GetContainerItemLink( bagId, slotId )
+end
+function C_Container.GetBagSlotFlag( bagId, filterFlagCheck )
+	-- returns true if the filterFlagCheck matches the bag's filterFlag
+	return true
+end
+function C_Container.GetContainerNumFreeSlots( bagId )
 	-- http://www.wowwiki.com/API_GetContainerNumFreeSlots
 	-- http://www.wowwiki.com/BagType
 	-- returns numberOfFreeSlots, BagType
@@ -793,7 +839,7 @@ function GetContainerNumFreeSlots( bagId )
 		return 0, 0
 	end
 end
-function GetContainerNumSlots( bagId )
+function C_Container.GetContainerNumSlots( bagId )
 	-- http://wowwiki.wikia.com/wiki/API_GetContainerNumSlots
 	-- returns the number of slots in the bag, or 0 if no bag
 	if bagInfo[bagId] then
@@ -802,29 +848,10 @@ function GetContainerNumSlots( bagId )
 		return 0
 	end
 end
-function GetBagSlotFlag( bagId, filterFlagCheck )
-	-- returns true if the filterFlagCheck matches the bag's filterFlag
-	return true
+function C_Container.GetSortBagsRightToLeft()
+	return C_Container.SortBagsRightToLeft
 end
-function GetCurrencyInfo( id ) -- id is integer, currencyLink, currencyString
-	-- integer, link, "currency:###"
-	-- http://wowprogramming.com/docs/api/GetCurrencyInfo
-	-- returns name, amount, texturePath, earnedThisWeek, weeklyMax, totalMax, isDiscovered
-	id = tostring(id)
-	if Currencies[id] then
-		local c = Currencies[id]
-		return c["name"], (myCurrencies[id] or 0), "", 0, c["weeklyMax"], c["totalMax"], true
-	end
-end
-function GetCurrencyLink( id )
-	id = tostring(id)
-	if Currencies[id] then
-		return Currencies[id].link
-	end
-end
-function GetCurrencyListSize()
-	-- @TODO
-	return #Currencies
+function C_Container.UseContainerItem( bagId, slotId )
 end
 function GetEquipmentSetItemIDs( setName )
 	-- http://wowprogramming.com/docs/api/GetEquipmentSetItemIDs
@@ -912,6 +939,9 @@ function GetItemInfo( itemIn )
 	if Items[itemID] then
 		return Items[itemID].name, Items[itemID].link
 	end
+end
+function GetLocale()
+	return myLocale
 end
 function GetMastery()
 	return 21.3572
@@ -1032,6 +1062,10 @@ function GetNumEquipmentSets()
 	-- Returns 0,MAX_NUM_EQUIPMENT_SETS
 	return #EquipmentSets
 end
+function GetRepairAllCost()
+	-- Returns cost to repair all, and if can repair
+	return 5000, true  -- 50s and yes
+end
 function GetNumFactions()
 	-- returns number of factions
 	-- I believe that this should return the correct number that are SHOWN.
@@ -1054,6 +1088,10 @@ function GetNumRoutes( nodeId )
 	-- http://wowprogramming.com/docs/api/GetNumRoutes
 	-- returns numHops
 	return TaxiNodes[nodeId].hops
+end
+function GetNumSavedInstances()
+	-- @TODO: Research this
+	return 0
 end
 -- GetNumTradeSkills is deprecated
 --function GetNumTradeSkills( )
@@ -1145,6 +1183,11 @@ function GetUnitName( lookupStr )
 		return myParty.roster[partyIndex]
 	end
 end
+function GetUnitSpeed( lookupStr )
+	lookupStr = string.lower( lookupStr )
+
+	return (unitSpeeds[lookupStr])
+end
 --[[
 function HasNewMail()
 	return true
@@ -1188,6 +1231,12 @@ function IsInRaid()
 	-- myParty = { ["group"] = nil, ["raid"] = nil } -- set one of these to true to reflect being in group or raid.
 	return ( myParty["raid"] and 1 or nil )
 end
+function IsFlying()
+end
+function IsMounted()
+end
+function GetCursorInfo()
+end
 function GetInstanceInfo()
 	-- https://wowwiki.fandom.com/wiki/API_GetInstanceInfo
 	-- name, type, difficultyIndex, difficultyName, maxPlayers, dynamicDifficulty, isDynamic, instanceMapId, lfgID = GetInstanceInfo()
@@ -1198,6 +1247,9 @@ function GetInstanceInfo()
 end
 function GetDifficultyInfo( diffInt )
 	return dungeonDifficultyLookup[diffInt]
+end
+function GetFramerate()
+	return 8
 end
 function IsResting()
 	return true
@@ -1296,6 +1348,9 @@ function RegisterAddonMessagePrefix( prefix )
 	-- prefix can be up to 16 characters
 	-- Cannot be empty.
 	-- What does this do?  In a bigger system, it could allow random messages to be generated
+end
+function RepairAllItems( useGuild )
+	-- performs rapir, uses guild money if useGuild is true
 end
 function RequestTimePlayed()
 end
@@ -1396,6 +1451,12 @@ function TaxiNodeGetType( nodeId )
 	-- http://www.wowwiki.com/API_TaxiNodeGetType
 	return TaxiNodes[nodeId].type
 end
+function setUnitOnTaxi( valueIn )
+	settings.unitOnTaxi = valueIn
+end
+function UnitOnTaxi()
+	return settings.unitOnTaxi or false
+end
 function UnitAffectingCombat( unit )
 	return false
 end
@@ -1409,7 +1470,10 @@ function UnitAura( unit, index, filter )
 	end
 end
 function UnitClass( who )
-	return Units[who].class
+	return Units[who].class, Units[who].classCAPS, Units[who].classIndex
+end
+function UnitGUID( who )
+	return "playerGUID"
 end
 function UnitHealthMax( who )
 	-- http://wowwiki.wikia.com/wiki/API_UnitHealth
@@ -1420,7 +1484,8 @@ function UnitFactionGroup( who )
 	return unpack( Units[who].faction )
 end
 function UnitIsDeadOrGhost( who )
-
+end
+function UnitIsPVP( who )
 end
 function UnitLevel( who )
 	local unitLevels = {
@@ -1567,6 +1632,36 @@ function C_MountJournal.GetMountIDs( )
 	return {}
 end
 
+----------
+-- C_CurrencyInfo
+----------
+C_CurrencyInfo = {}
+function C_CurrencyInfo.GetCurrencyInfo( id ) -- id is integet
+	-- returns a table:
+	-- 		localName, isHeader, isHeaderExpanded, isTypeUnused, isShowInBackpack, quantity, iconFileID, maxQuantity,
+	--      canEarnPerWeek, quantityEarnedThisWeek, isTradeable, quality, maxWeeklyQuantity, discovered
+	local ci = Currencies[id]
+	if ci then
+		return { ["localName"]=ci.name, ["isHeader"]=false, ["isHeaderExpanded"]=false, ["isTypeUnused"]=false,
+				["isShowInBackpack"]=false, ["quantity"]=(myCurrencies[id] or 0), ["discovered"] = ci.isDiscovered,
+				["canEarnPerWeek"]=ci.weeklyMax, ["maxQuantity"]=ci.totalMax, ["quantityEarnedThisWeek"]=0 }
+				-- @TODO: fix the quantityEarnedThisWeek to come from myCurrencies
+	end
+end
+function C_CurrencyInfo.GetCurrencyLink( id )
+	if Currencies[id] then
+		return Currencies[id].link
+	end
+end
+
+Enum = {}
+Enum.TooltipDataType = {}
+Enum.TooltipDataType.Item = 0
+
+TooltipDataProcessor = {}
+function TooltipDataProcessor.AddTooltipPostCall()
+end
+
 -----------------------------------------
 -- TOC functions
 addonData = {}
@@ -1581,9 +1676,9 @@ function ParseTOC( tocFile, useRequire )
 		while true do
 			local linestart, lineend, line = string.find( tocContents, "(.-)\n" )
 			if linestart then
-				local lua, luaEnd, luaFile = string.find( line, "([%a]*)%.lua" )
-				local xml, xmlEnd, xmlFile = string.find( line, "([%a]*)%.xml" )
-				local hash, hashEnd, hashKey, hashValue = string.find( line, "## ([%a]*): (.*)" )
+				local lua, luaEnd, luaFile = string.find( line, "([_%a]*)%.lua" )
+				local xml, xmlEnd, xmlFile = string.find( line, "([_%a]*)%.xml" )
+				local hash, hashEnd, hashKey, hashValue = string.find( line, "## ([_%a]*): (.*)" )
 				if( hash ) then
 					addonData[ hashKey ] = hashValue
 				elseif( lua ) then
