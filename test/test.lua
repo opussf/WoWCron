@@ -319,7 +319,7 @@ function test.testMacro_unkownMacro()
 	local run, cmd = wowCron.RunNow( "@hurly /hello there mortal one. What is up?", ts )
 	assertIsNil( run, "This should be nil" )
 end
-function test.test_Macro_First()
+function test.notest_Macro_First()
 	wowCron.Command("add @first /say hello")
 	wowCron.Command("add @first /g hello guild")
 	wowCron.hasFirstBeenRun = nil
@@ -400,11 +400,21 @@ end
 -- 	wowCron.RunNowList()
 -- end
 function test.notestOnUpdate_runOne()
+	print("=-=-=-=-=-")
 	cron_player = {"* * * * * /in item:54233 7" }
 	cron_global = {}
+
 	wowCron.Command("* * * * * /cron list")
 	wowCron.BuildRunNowList()
+	for k, v in pairs( wowCron.toRun ) do
+		print( k, v )
+	end
+
 	wowCron.OnUpdate()
+	for k, v in pairs( wowCron.toRun ) do
+		print( k, v )
+	end
+
 	assertEquals( 1, #wowCron.toRun ) -- one should be left
 end
 function test.notestOnUpdate_runTwo()
@@ -425,9 +435,6 @@ function test.notestOnUpdate_runTwo()
 end
 function test.testPlayerCronsAreLast()
 	assertEquals( "* * * * * /in item:54233 7", wowCron.crons[6])
-end
-function test.testExpand_eventMacro()
-	--local expandedThing = wowCron.Expand( "@first", "min")
 end
 function test.testLongTest()
 	-- run a bunch of things

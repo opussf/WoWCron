@@ -233,13 +233,13 @@ function wowCron.RunNow( cmdIn, ts )
 	-- do the macro expansion here, since I want to return true for @first if within the first ~60 seconds of being run.
 	local macro, cmd = strmatch( cmdIn, "^(@%S+)%s+(.*)$" )
 	if macro then
-		--print( "MACRO: "..macro )
+		print( "MACRO: "..macro )
 		if wowCron.macros[macro] then -- expand the macro
 			if wowCron.macros[macro].cron then
-				--print( "CRON: "..wowCron.macros[macro].cron )
+				print( "CRON: "..wowCron.macros[macro].cron )
 				cmdIn = wowCron.macros[macro].cron.." "..cmd
 			elseif wowCron.macros[macro].event then
-				--print( "EVENT: "..wowCron.macros[macro].event )
+				print( "EVENT: "..wowCron.macros[macro].event )
 				--print( "Register >"..cmd.."< to run for event: "..macro.." ("..wowCron.macros[macro].event..")")
 				wowCron.EventCmd( wowCron.macros[macro].event, cmd )
 				return
