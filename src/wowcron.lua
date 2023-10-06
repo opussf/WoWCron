@@ -82,6 +82,7 @@ function wowCron.PLAYER_ENTERING_WORLD()
 	-- since this only gets called once, the can be where the @first macro is created.
 	wowCron_Frame:UnregisterEvent( "PLAYER_ENTERING_WORLD" )
 	wowCron.BuildSlashCommands()
+	wowCron.BuildRunNowList()
 	--wowCron.started = time()
 	--wowCron.macros["@first"] = wowCron.BuildFirstCronMacro()
 end
@@ -241,11 +242,16 @@ function wowCron.RunNow( cmdIn, ts )
 				--print( "EVENT: "..wowCron.macros[macro].event )
 				--print( "Register >"..cmd.."< to run for event: "..macro.." ("..wowCron.macros[macro].event..")")
 				wowCron.EventCmd( wowCron.macros[macro].event, cmd )
+				return
+			else
+				print( "macro, not cron, not event")
 			end
 		else
 			print("Invalid macro in: "..cmdIn)
 			return
 		end
+	else
+		print( cmdIn.."< is not a macro" )
 	end
 
 	-- put all six values into parsed table
