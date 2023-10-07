@@ -87,9 +87,9 @@ function wowCron.PLAYER_ENTERING_WORLD()
 end
 function wowCron.LOADING_SCREEN_DISABLED()
 	-- this event is also a bit special.
-	print( "LOADING_SCREEN_DISABLED" )
-	print( wowCron.hasFirstBeenRun and "I've been run" or "I've NOT been run" )
-	print( wowCron.eventCmds["LOADING_SCREEN_DISABLED"] or "no commands for this event" )
+	if wowCron.debug then print( "LOADING_SCREEN_DISABLED" ) end
+	--print( wowCron.hasFirstBeenRun and "I've been run" or "I've NOT been run" )
+	--print( wowCron.eventCmds["LOADING_SCREEN_DISABLED"] or "no commands for this event" )
 	if not wowCron.hasFirstBeenRun and wowCron.eventCmds["LOADING_SCREEN_DISABLED"] then
 		for _, cmd in pairs( wowCron.eventCmds["LOADING_SCREEN_DISABLED"] ) do
 			print("adding cmd to toRun: "..cmd)
@@ -232,25 +232,21 @@ function wowCron.RunNow( cmdIn, ts )
 	-- do the macro expansion here, since I want to return true for @first if within the first ~60 seconds of being run.
 	local macro, cmd = strmatch( cmdIn, "^(@%S+)%s+(.*)$" )
 	if macro then
-		print( "MACRO: "..macro )
+		if wowCron.debug then print( "MACRO: "..macro ) end
 		if wowCron.macros[macro] then -- expand the macro
 			if wowCron.macros[macro].cron then
-				print( "CRON: "..wowCron.macros[macro].cron )
+				if wowCron.debug then print( "CRON: "..wowCron.macros[macro].cron ) end
 				cmdIn = wowCron.macros[macro].cron.." "..cmd
 			elseif wowCron.macros[macro].event then
-				print( "EVENT: "..wowCron.macros[macro].event )
+				if wowCron.debug then print( "EVENT: "..wowCron.macros[macro].event ) end
 				--print( "Register >"..cmd.."< to run for event: "..macro.." ("..wowCron.macros[macro].event..")")
 				wowCron.EventCmd( wowCron.macros[macro].event, cmd )
 				return
-			else
-				print( "macro, not cron, not event")
 			end
 		else
 			print("Invalid macro in: "..cmdIn)
 			return
 		end
-	else
-		print( cmdIn.."< is not a macro" )
 	end
 
 	-- put all six values into parsed table
