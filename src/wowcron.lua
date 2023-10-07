@@ -71,19 +71,15 @@ function wowCron.OnUpdate()
 	end
 end
 function wowCron.ADDON_LOADED()
-	-- Unregister the event for this method.
 	wowCron_Frame:UnregisterEvent( "ADDON_LOADED" )
 	wowCron.lastUpdated = time()
 	wowCron.ParseAll()
 	wowCron.BuildSlashCommands()
 end
 function wowCron.PLAYER_ENTERING_WORLD()
-	-- since this only gets called once, the can be where the @first macro is created.
 	wowCron_Frame:UnregisterEvent( "PLAYER_ENTERING_WORLD" )
 	wowCron.BuildSlashCommands()
 	wowCron.BuildRunNowList()
-	--wowCron.started = time()
-	--wowCron.macros["@first"] = wowCron.BuildFirstCronMacro()
 end
 function wowCron.LOADING_SCREEN_DISABLED()
 	-- this event is also a bit special.
@@ -92,7 +88,7 @@ function wowCron.LOADING_SCREEN_DISABLED()
 	--print( wowCron.eventCmds["LOADING_SCREEN_DISABLED"] or "no commands for this event" )
 	if not wowCron.hasFirstBeenRun and wowCron.eventCmds["LOADING_SCREEN_DISABLED"] then
 		for _, cmd in pairs( wowCron.eventCmds["LOADING_SCREEN_DISABLED"] ) do
-			print("adding cmd to toRun: "..cmd)
+			if wowCron.debug then print("adding cmd to toRun: "..cmd) end
 			table.insert( wowCron.toRun, cmd )
 		end
 		wowCron.hasFirstBeenRun = true
@@ -107,6 +103,10 @@ function wowCron.EventCmd( event, cmd )
 	if( event == "ADDON_LOADED" or event == "VARIABLES_LOADED" ) then  -- don't let these be registereed.
 		return
 	end
+
+	-- replace the eventCmds with a 'back parse' of wowCron.macros to find the macro to look for in the wowCron.crons table.
+	-- when a event macro cron is removed, this means it will be removed fom the wowCron.crons table (which is recreated).
+	-- Since there is a map of the macros to events, that can be parsed.
 	-- record cmd in table
 	if not wowCron.eventCmds[event] then
 		wowCron.eventCmds[event] = {}
@@ -122,6 +122,7 @@ function wowCron.EventCmd( event, cmd )
 				end
 			else
 				wowCron.Print( "There are no commands registerd for this event: ("..event..")" )
+				wowCron_Frame:UnregisterEvent( event )
 			end
 		end
 	end
@@ -373,6 +374,8 @@ function wowCron.Remove( index )
 	index = tonumber(index)
 	if index and index>0 and index<=#cronTable then
 		local entry = table.remove( cronTable, index )
+		wowCron.eventCmds = {}  -- clears any commands for any registerd events.
+		wowCron.BuildRunNowList()  -- goes through process of rebuilding
 		wowCron.Print( COLOR_RED.."REMOVING: "..COLOR_END..entry )
 	end
 	wowCron.ParseAll()
