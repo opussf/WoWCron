@@ -41,6 +41,7 @@ wowCron.macros = {  -- keep a 1 to 1 mapping for macro to event.
 	["@first"] = { ["event"] = "LOADING_SCREEN_DISABLED" },
 	["@gold"] = { ["event"] = "PLAYER_MONEY" },
 	["@token"] = { ["event"] = "TOKEN_MARKET_PRICE_UPDATED" },
+	["@level"] = { ["event"] = "PLAYER_LEVEL_UP" },
 }
 wowCron.chatChannels = {
 	["/s"]    = "SAY",
@@ -93,7 +94,6 @@ function wowCron.LOADING_SCREEN_DISABLED()
 				tinsert( wowCron.toRun, strsub( cron, b+2 ) )
 			end
 		end
-	else
 		wowCron.hasFirstBeenRun = true
 	end
 	wowCron_Frame:UnregisterEvent( "LOADING_SCREEN_DISABLED" )
