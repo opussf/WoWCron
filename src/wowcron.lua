@@ -371,7 +371,7 @@ function wowCron.PrintHelp()
 	wowCron.Print("cmd can be any currently installed addon slash command, an emote, or '/run <lua code>'.")
 	for cmd, info in pairs(wowCron.CommandList) do
 		wowCron.Print(string.format("%s %s %s -> %s",
-			SLASH_CRON1, cmd, info.help[1], info.help[2]))
+				SLASH_CRON1, cmd, info.help[1], info.help[2]))
 	end
 end
 function wowCron.List()
@@ -404,8 +404,8 @@ end
 function wowCron.ListMacros()
 	wowCron.Print( "Available macros:" )
 	for macro, struct in pairs( wowCron.macros ) do
-		wowCron.Print( string.format( "%s %s \"%s\"",
-			macro, (struct.cron and "expands to" or "run on event"), (struct.cron or struct.event) ) )
+		wowCron.Print( string.format( "%s : %s \"%s\"",
+				macro, (struct.cron and "expands to" or "run on event"), (struct.cron or struct.event) ) )
 	end
 end
 wowCron.CommandList = {
