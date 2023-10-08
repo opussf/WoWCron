@@ -477,9 +477,6 @@ function test.testEventMacro_Remove_RemovesCommandFromEventCommands()
 	print("PLAYER_MONEY list")
 	wowCron.BuildRunNowList()
 	wowCron.PLAYER_MONEY()
-	for k,v in pairs( wowCron.toRun ) do
-		print( k, v )
-	end
 
 end
 
