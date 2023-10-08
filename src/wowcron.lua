@@ -394,11 +394,19 @@ function wowCron.AddEntry( entry )
 	if strlen( entry ) >= 9 then -- VERY mimimum size of a cron is 9 char (5x * and 4 spaces)
 		cronTable = wowCron.global and cron_global or cron_player
 		table.insert( cronTable, entry )
+		wowCron.RunNow( entry )
 		wowCron.Print( string.format("Added to %s: %s", (wowCron.global and "global" or "personal"), entry ) )
 	else
 		wowCron.PrintHelp()
 	end
 	wowCron.ParseAll()
+end
+function wowCron.ListMacros()
+	wowCron.Print( "Available macros:" )
+	for macro, struct in pairs( wowCron.macros ) do
+		wowCron.Print( string.format( "%s %s \"%s\"",
+			macro, (struct.cron and "expands to" or "run on event"), (struct.cron or struct.event) ) )
+	end
 end
 wowCron.CommandList = {
 	["help"] = {
@@ -420,6 +428,10 @@ wowCron.CommandList = {
 	["add"] = {
 		["func"] = wowCron.AddEntry,
 		["help"] = {"<entry>", "Adds an entry. Default action."}
+	},
+	["macros"] = {
+		["func"] = wowCron.ListMacros,
+		["help"] = {"", "List the macros."}
 	},
 }
 function wowCron.Command( msg, isGlobal )
