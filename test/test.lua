@@ -19,7 +19,6 @@ function test.before()
 		"0 * * * * /cheer"
 	}
 	wowCron.events = {}
-	wowCron.eventCmds = {}
 	wowCron.OnLoad()
 	wowCron.ADDON_LOADED()
 	wowCron.PLAYER_ENTERING_WORLD()
@@ -455,6 +454,38 @@ function test.testLongTest()
 	wowCron.OnUpdate()
 	wowCron.OnUpdate()
 end
+function test.testEventMacro_Add_CreatesFunction()
+	wowCron.PLAYER_MONEY = nil
+	wowCron.Command("@gold /snap")
+	wowCron.ParseAll()
+	wowCron.BuildRunNowList()
+	assertTrue( wowCron.PLAYER_MONEY )
+	wowCron.PLAYER_MONEY()
+end
+function test.testEventMacro_Add_RegistersEvent()
+	wowCron_Frame.Events = {}
+	wowCron.PLAYER_MONEY = nil
+	wowCron.Command("@gold /snap")
+	wowCron.BuildRunNowList()
+	assertTrue( wowCron_Frame.Events.PLAYER_MONEY )
+end
+function test.testEventMacro_Remove_RemovesCommandFromEventCommands()
+	wowCron.PLAYER_MONEY = nil
+	wowCron.toRun = {}
+	wowCron.Command("@gold /fart")
+	wowCron.Command("@gold /rested gold")
+	print("PLAYER_MONEY list")
+	wowCron.BuildRunNowList()
+	wowCron.PLAYER_MONEY()
+	for k,v in pairs( wowCron.toRun ) do
+		print( k, v )
+	end
+
+end
+
+
+
+
 
 
 
