@@ -37,6 +37,7 @@ wowCron.monthNames = { "jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "
 wowCron.macros = {  -- keep a 1 to 1 mapping for macro to event.
 	["@hourly"]   = { ["cron"] = "0 * * * *" },
 	["@midnight"] = { ["cron"] = "0 0 * * *" },
+	["@noon"] = { ["cron"] = "0 12 * * *" },
 	["@first"] = { ["event"] = "LOADING_SCREEN_DISABLED" },
 	["@gold"] = { ["event"] = "PLAYER_MONEY" },
 	["@token"] = { ["event"] = "TOKEN_MARKET_PRICE_UPDATED" },
@@ -67,7 +68,6 @@ function wowCron.OnUpdate()
 	if (wowCron.lastUpdated < nowTS) and (nowTS % 60 == 0) then
 		wowCron.lastUpdated = nowTS
 		wowCron.BuildRunNowList() -- This is where building the list needs to happen.
-		--wowCron.Print("Update: "..#wowCron.toRun)
 	end
 end
 function wowCron.ADDON_LOADED()
