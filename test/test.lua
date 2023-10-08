@@ -480,10 +480,4 @@ function test.testEventMacro_Remove_RemovesCommandFromEventCommands()
 
 end
 
-
-
-
-
-
-
 test.run()

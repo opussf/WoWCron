@@ -133,7 +133,7 @@ function wowCron.BuildEvent( event  )
 				end
 			end
 			if eventCount == 0 then
-				wowCron.Print( "There are no commands registerd for this event: ("..event..")" )
+				--wowCron.Print( "There are no commands registerd for this event: ("..event..")" )
 				wowCron_Frame:UnregisterEvent( event )
 			end
 		end
