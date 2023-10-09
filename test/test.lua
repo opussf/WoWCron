@@ -479,5 +479,136 @@ function test.testEventMacro_Remove_RemovesCommandFromEventCommands()
 	wowCron.PLAYER_MONEY()
 
 end
+----------
+-- AT
+----------
+function test.testAT_hasCommand()
+	wowCron.AtCommand( "" )
+end
+function test.testAT_AddACommand_900AM()
+	wowCron.AtCommand( "9:00 AM /wave" )
+	target = date( "*t" )
+	if( target.hour >= 9 ) then
+		target = date( "*t", time()+86400 ) -- get tomorrow to reset time back to the desired target
+	end
+	target.hour = 9; target.min = 0; target.sec = 0;
+	targetTS = time( target )
+	assertTrue( at_player[targetTS] )
+	assertEquals( "/wave", at_player[targetTS][1] )
+end
+function test.testAT_AddACommand_900PM()
+	wowCron.AtCommand( "9:00 PM /snore" )
+	target = date( "*t" )
+	if( target.hour >= 21 ) then
+		target = date( "*t", time()+86400 ) -- get tomorrow to reset time back to the desired target
+	end
+	target["hour"] = 21; target.min = 0; target.sec = 0;
+	targetTS = time( target )
+	--print( targetTS..">?"..time() )
+	assertTrue( at_player[targetTS] )
+	assertEquals( "/snore", at_player[targetTS][1] )
+end
+function test.testAT_AddGlobalCommand_900()
+	wowCron.AtCommand( "900 /gawk" )
+	target = date( "*t" )
+	if( target.hour >= 9 ) then
+		target = date( "*t", time()+86400 ) -- get tomorrow to reset time back to the desired target
+	end
+	target.hour = 9; target.min = 0; target.sec = 0;
+	targetTS = time( target )
+	print( date( "%x %X", targetTS )..">?"..date( "%x %X", time() ) )
+	for k in pairs( at_player ) do
+		print( date( "%x %X", k ) )
+	end
+	assertTrue( at_player[targetTS] )
+	assertEquals( "/gawk", at_player[targetTS][1] )
+end
+function test.testAT_AddGlobalCommand_1130()
+	wowCron.AtCommand( "global 1130 /silly" )
+	target = date( "*t" )
+	if( target.hour >= 11 and target.min >=30 ) then
+		target = date( "*t", time() + 86400 )
+	end
+	target.hour = 11; target.min = 30; target.sec = 0;
+	targetTS = time( target )
+	print( targetTS..">?"..time() )
+	assertTrue( at_global[targetTS] )
+	assertEquals( "/silly", at_global[targetTS][1] )
+end
+function test.testAT_Named_noon()
+	wowCron.AtCommand( "noon /giggle" )
+	local target = date( "*t" )
+	if( target.hour >= 12 ) then
+		target = date( "*t", time()+86400 ) -- get tomorrow to reset time back to the desired target
+	end
+	target.hour = 12; target.min = 0; target.sec = 0;
+	targetTS = time( target )
+	assertTrue( at_player[targetTS] )
+	assertEquals( "/giggle", at_player[targetTS][1] )
+end
+function test.testAT_Named_midnight()
+	wowCron.AtCommand( "midnight /sleep" )
+	target = date( "*t" )
+	if( target.hour >= 0 ) then
+		target = date( "*t", time()+86400 ) -- get tomorrow to reset time back to the desired target
+	end
+	target.hour = 0; target.min = 0; target.sec = 0;
+	targetTS = time( target )
+	assertTrue( at_player[targetTS] )
+	assertEquals( "/sleep", at_player[targetTS][1] )
+end
+function test.testAT_Named_teatime()
+	wowCron.AtCommand( "teatime /cheers" )
+	target = date( "*t" )
+	if( target.hour >= 16 ) then
+		target = date( "*t", time()+86400 ) -- get tomorrow to reset time back to the desired target
+	end
+	target.hour = 16; target.min = 0; target.sec = 0;
+	targetTS = time( target )
+	assertTrue( at_player[targetTS] )
+	assertEquals( "/cheers", at_player[targetTS][1] )
+end
+function test.testAT_Date_811()
+	wowCron.AtCommand( "8/11 /hny" )
+	target = date( "*t" )
+	target.month = 8; target.day = 11; target.sec = 0;
+	targetTS = time( target )
+	assertTrue( at_player[targetTS] )
+	assertEquals( "/hny", at_player[targetTS][1] )
+end
+function test.testAT_Date_081122()
+	wowCron.AtCommand( "8/11/22 /future" )
+	target = date( "*t" )
+	target.month = 8; target.day = 11; target.year = 2022;
+	targetTS = time( target )
+	assertTrue( at_player[targetTS] )
+	assertEquals( "/future", at_player[targetTS][1] )
+end
+function test.testAT_Date_08112022()
+	wowCron.AtCommand( "8/11/2022 /fullyear" )
+	target = date( "*t" )
+	target.month = 8; target.day = 11; target.year = 2022;
+	targetTS = time( target )
+	assertTrue( at_player[targetTS] )
+	assertEquals( "/fullyear", at_player[targetTS][1] )
+end
+
+function test.testAT_Date_0811_2()
+	wowCron.AtCommand( "11.08 /future" )
+	target = date( "*t" )
+	target.month = 8; target.day = 11; target.year = 2022;
+	targetTS = time( target )
+	assertTrue( at_player[targetTS] )
+	assertEquals( "/future", at_player[targetTS][1] )
+end
+function test.testAT_Date_0811_2()
+	wowCron.AtCommand( "11.08 /future" )
+	target = date( "*t" )
+	target.month = 8; target.day = 11; target.year = 2022;
+	targetTS = time( target )
+	assertTrue( at_player[targetTS] )
+	assertEquals( "/future", at_player[targetTS][1] )
+end
+
 
 test.run()
