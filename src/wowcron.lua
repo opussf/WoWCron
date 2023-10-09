@@ -40,7 +40,6 @@ wowCron.macros = {  -- keep a 1 to 1 mapping for macro to event.
 	["@noon"] = { ["cron"] = "0 12 * * *" },
 	["@first"] = { ["event"] = "LOADING_SCREEN_DISABLED" },
 	["@gold"] = { ["event"] = "PLAYER_MONEY" },
-	["@token"] = { ["event"] = "TOKEN_MARKET_PRICE_UPDATED" },
 	["@level"] = { ["event"] = "PLAYER_LEVEL_UP" },
 }
 wowCron.chatChannels = {
