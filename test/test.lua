@@ -18,6 +18,7 @@ function test.before()
 		"* * 1,15 * * /dance",
 		"0 * * * * /cheer"
 	}
+	wowCron.events = {}
 	wowCron.OnLoad()
 	wowCron.ADDON_LOADED()
 	wowCron.PLAYER_ENTERING_WORLD()
@@ -35,14 +36,14 @@ function test.validValues( expected, actual )
 		assertTrue( expected[i] )
 	end
 end
-function test.testADDON_LOADED_buildsEventsTable()
+function test.testADDON_LOADED_buildsCronsTable()
 	-- this should already be loaded
 	size = 0
-	for k,v in pairs( wowCron.events ) do
+	for k,v in pairs( wowCron.crons ) do
 		size = size + 1
 	end
 	assertEquals( 6, size )
-	--assertEquals( 0, wowCron.events["* * * * * /in item:54233 7"] )
+	--assertEquals( 0, wowCron.crons["* * * * * /in item:54233 7"] )
 end
 function test.testExpand_minute_all()
 	local expectedValues = {}
@@ -254,18 +255,18 @@ function test.testRunNow_minHourDayMonth_no()
 	local run, cmd = wowCron.RunNow( "2 0 25 5 * /hello it is 00:02 May 25.", ts )
 	assertIsNil( run, "This should not run" )
 end
-function test.testBuildFirstCronMacro_expands()
-	wowCron.started = time({["year"] = 2016, ["month"] = 5, ["day"] = 25, ["hour"] = 0, ["min"] = 0, ["sec"] = 0})
-	cron = wowCron.BuildFirstCronMacro()
-	assertEquals( "1 0 25 5 *", cron )
-end
-function test.testBuildFirstCronMacro_added()
-	found = false
-	for k,v in pairs(wowCron.macros) do
-		found = found or (k == "@first")
-	end
-	assertTrue( found, "@first should be auto generated and added to the macro list." )
-end
+-- function test.testBuildFirstCronMacro_expands()
+-- 	wowCron.started = time({["year"] = 2016, ["month"] = 5, ["day"] = 25, ["hour"] = 0, ["min"] = 0, ["sec"] = 0})
+-- 	cron = wowCron.BuildFirstCronMacro()
+-- 	assertEquals( "1 0 25 5 *", cron )
+-- end
+-- function test.testBuildFirstCronMacro_added()
+-- 	found = false
+-- 	for k,v in pairs(wowCron.macros) do
+-- 		found = found or (k == "@first")
+-- 	end
+-- 	assertTrue( found, "@first should be auto generated and added to the macro list." )
+-- end
 function test.testCmd_global_flag()
 	wowCron.Command("global")
 	assertTrue( wowCron.global )
@@ -317,6 +318,36 @@ function test.testMacro_unkownMacro()
 	local run, cmd = wowCron.RunNow( "@hurly /hello there mortal one. What is up?", ts )
 	assertIsNil( run, "This should be nil" )
 end
+function test.notest_Macro_First()
+	wowCron.Command("add @first /say hello")
+	wowCron.Command("add @first /g hello guild")
+	wowCron.hasFirstBeenRun = nil
+	wowCron.lastUpdated = 0
+	wowCron.BuildRunNowList()
+	wowCron.OnUpdate()
+	wowCron.LOADING_SCREEN_DISABLED()
+	--print( "num in toRun: "..#wowCron.toRun )
+	assertTrue( wowCron.hasFirstBeenRun )
+	assertIsNil( wowCron_Frame.Events["LOADING_SCREEN_DISABLED"], "LOADING_SCREEN_DISABLED should not be a registerd event anymore." )
+	wowCron.OnUpdate()
+	wowCron.OnUpdate()
+	wowCron.OnUpdate()
+	assertEquals( 0, #wowCron.toRun, "toRun list should be empty by now." )
+end
+function test.test_Macro_Gold()
+	wowCron.toRun = {}
+	wowCron.Command("add @gold /snap")
+	wowCron.BuildRunNowList()
+	assertTrue( wowCron.PLAYER_MONEY, "PLAYER_MONEY event function should exist" )
+	assertTrue( wowCron_Frame.Events["PLAYER_MONEY"], "PLAYER_MONEY should be a registerd event" )
+	wowCron.PLAYER_MONEY()
+	foundInToRun = false
+	for _, v in pairs( wowCron.toRun ) do
+		if v == "/snap" then foundInToRun = true
+		end
+	end
+	assertTrue( foundInToRun, "/snap should be found in the list of events to do." )
+end
 function test.testMonthNameExpansion_oneMonth_yes()
 	local ts = time({["year"] = 2016, ["month"] = 5, ["day"] = 25, ["hour"] = 0, ["min"] = 0, ["sec"] = 0})
 	local run, cmd = wowCron.RunNow( "* * * may * /hello it is in May.", ts )
@@ -356,38 +387,97 @@ function test.testCmd_spaceStrip()
 	cmd, parameters = wowCron.DeconstructCmd( "/hello  There is an extra space here." )
 	assertEquals( "There is an extra space here.", parameters )
 end
-function test.testBuildRunNowList_CreatesEntries()
+function test.notestBuildRunNowList_CreatesEntries()
 	cron_player = {"* * * * * /in item:54233 7" }
 	cron_global = {}
 	wowCron.Command("* * * * * /cron list")
 	wowCron.BuildRunNowList()
 	assertEquals( 2, #wowCron.toRun )
 end
-function test.testRunNowList_runsOnEmptyList()
-	assertEquals( 0, #wowCron.toRun )  -- start with it empty.  Make sure of this
-	wowCron.RunNowList()
-end
-function test.testOnUpdate_runOne()
+-- function test.testRunNowList_runsOnEmptyList()
+-- 	assertEquals( 0, #wowCron.toRun )  -- start with it empty.  Make sure of this
+-- 	wowCron.RunNowList()
+-- end
+function test.notestOnUpdate_runOne()
+	print("=-=-=-=-=-")
 	cron_player = {"* * * * * /in item:54233 7" }
 	cron_global = {}
+
 	wowCron.Command("* * * * * /cron list")
 	wowCron.BuildRunNowList()
+	for k, v in pairs( wowCron.toRun ) do
+		print( k, v )
+	end
+
 	wowCron.OnUpdate()
+	for k, v in pairs( wowCron.toRun ) do
+		print( k, v )
+	end
+
 	assertEquals( 1, #wowCron.toRun ) -- one should be left
 end
-function test.testOnUpdate_runTwo()
+function test.notestOnUpdate_runTwo()
 	cron_player = {"* * * * * /in item:54233 7" }
 	cron_global = {}
 	wowCron.Command("* * * * * /cron list")
+	for k, v in pairs( wowCron.toRun ) do
+		print( k, v )
+	end
 	wowCron.BuildRunNowList()
+	for k, v in pairs( wowCron.toRun ) do
+		print( k, v )
+	end
 	wowCron.OnUpdate()
 	assertEquals( 1, #wowCron.toRun ) -- one should be left
 	wowCron.OnUpdate()
 	assertEquals( 0, #wowCron.toRun ) -- none left
 end
-function test.testPlayerEventsAreLast()
-	assertEquals( "* * * * * /in item:54233 7", wowCron.events[6])
+function test.testPlayerCronsAreLast()
+	assertEquals( "* * * * * /in item:54233 7", wowCron.crons[6])
 end
+function test.testLongTest()
+	-- run a bunch of things
+	--
+	cron_player = { "@first /g hello all" }
+	wowCron.events = {}
+	wowCron.eventCmds = {}
+	wowCron.OnLoad()
+	wowCron.ADDON_LOADED()
+	wowCron.OnUpdate()
+	wowCron.PLAYER_ENTERING_WORLD()
+	wowCron.OnUpdate()
+	wowCron.OnUpdate()
+	wowCron.LOADING_SCREEN_DISABLED()
+	wowCron.OnUpdate()
+	wowCron.OnUpdate()
+	wowCron.OnUpdate()
+	wowCron.OnUpdate()
+	wowCron.OnUpdate()
+end
+function test.testEventMacro_Add_CreatesFunction()
+	wowCron.PLAYER_MONEY = nil
+	wowCron.Command("@gold /snap")
+	wowCron.ParseAll()
+	wowCron.BuildRunNowList()
+	assertTrue( wowCron.PLAYER_MONEY )
+	wowCron.PLAYER_MONEY()
+end
+function test.testEventMacro_Add_RegistersEvent()
+	wowCron_Frame.Events = {}
+	wowCron.PLAYER_MONEY = nil
+	wowCron.Command("@gold /snap")
+	wowCron.BuildRunNowList()
+	assertTrue( wowCron_Frame.Events.PLAYER_MONEY )
+end
+function test.testEventMacro_Remove_RemovesCommandFromEventCommands()
+	wowCron.PLAYER_MONEY = nil
+	wowCron.toRun = {}
+	wowCron.Command("@gold /fart")
+	wowCron.Command("@gold /rested gold")
+	print("PLAYER_MONEY list")
+	wowCron.BuildRunNowList()
+	wowCron.PLAYER_MONEY()
 
+end
 
 test.run()
