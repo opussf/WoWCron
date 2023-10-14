@@ -60,6 +60,11 @@ Save as { [ts] = { "command", "command"}, }
 
 "* * * * * /run wowCron.Print(date(\"%H:%M\"))", -- [12]
 
+## Icon
+
+Possible other icon:
+https://static.wikia.nocookie.net/wowwiki/images/7/7f/Inv_misc_pocketwatch_01.png/revision/latest?cb=20061018134647
+
 ## memoryLeak
 
 Had a horrible usage of memory.
