@@ -57,6 +57,13 @@ Since WoWCron supports a global and a 'local' list, so shall AT.
 Save in at_global and at_player.
 Save as { [ts] = { "command", "command"}, }
 
+AT commands are saved.
+Character level AT commands are only carried out for that character, if logged in at the time, not for any others.
+Global level AT commands are carried out for any character logged in at the time.
+
+Note on parsing:
+
+
 
 "* * * * * /run wowCron.Print(date(\"%H:%M\"))", -- [12]
 

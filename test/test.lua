@@ -18,6 +18,8 @@ function test.before()
 		"* * 1,15 * * /dance",
 		"0 * * * * /cheer"
 	}
+	at_player = {}
+	at_global = {}
 	wowCron.events = {}
 	wowCron.OnLoad()
 	wowCron.ADDON_LOADED()

@@ -5,7 +5,7 @@
 ## Version: @VERSION@
 ## Description: Cron for WoW
 ## IconTexture: Interface\Icons\Spell_holy_borrowedtime
-## SavedVariables: cron_global cron_groups cron_knownSlashCmds cron_knownEmotes
-## SavedVariablesPerCharacter: cron_player
+## SavedVariables: cron_global at_global cron_groups cron_knownSlashCmds cron_knownEmotes
+## SavedVariablesPerCharacter: cron_player at_player
 wowcron.lua
 wowcron.xml
