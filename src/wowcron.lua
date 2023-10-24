@@ -493,9 +493,6 @@ function wowCron.AtAddEntry( msg )
 
 	local plusUnits = { ["minutes"] = 60, ["hours"] = 3600, ["days"] = 86400, ["weeks"] = 604800}
 	local plusValue = 0
-	-- for k,v in pairs( targetTime ) do
-	-- 	print( k, v )
-	-- end
 
 	msgItem, msg = strsplit( " ", msg, 2 )
 
@@ -504,7 +501,7 @@ function wowCron.AtAddEntry( msg )
 		-- find and replace 'shortcut' string
 		msgItem = shortcuts[msgItem] or msgItem
 
-		--print( "parsing: -->"..msgItem.."<-- with :"..(msg or "nil")..": left over" )
+		-- print( "parsing: -->"..msgItem.."<-- with :"..(msg or "nil")..": left over" )
 		-- find a date.  Do this first because the time string is 'funky'
 		_, _, month, split, day, year = strfind( msgItem, "([%d]?%d)([/.-])([%d%d]+)[/]?([%d%d]*)" )
 		if not split and (string.len( msgItem ) == 6 or string.len( msgItem ) == 8) then
@@ -540,16 +537,16 @@ function wowCron.AtAddEntry( msg )
 			parsed = true
 		end
 
-		--print( "After date parse: "..date( "%x %X", time( targetTime ) ) )
+		-- print( "After date parse: "..date( "%x %X", time( targetTime ) ) )
 
 		if not parsed then
 
 			-- find a time string
-			if( tonumber( msgItem ) and tonumber( msgItem ) < 1000 ) then -- if the item is a number less than 1000, add a "0" to the start.
-				msgItem = "0"..msgItem
-			end
+			-- if( tonumber( msgItem ) and tonumber( msgItem ) < 1000 ) then -- if the item is a number less than 1000, add a "0" to the start.
+			-- 	msgItem = "0"..msgItem
+			-- end
 			a, b, hourIn, minIn = strfind( msgItem, "([%d]?%d)[:]*([%d%d]+)" )
-			--print( "msgItem (time): "..msgItem.." > "..( hourIn or "nil")..":"..( minIn or "nil" ) )
+			-- print( "msgItem (time): "..msgItem.." > "..( hourIn or "nil")..":"..( minIn or "nil" ) )
 			if( hourIn ) then
 				targetTime.hour = tonumber( hourIn )
 			end
@@ -569,11 +566,11 @@ function wowCron.AtAddEntry( msg )
 
 		a, b, plusCount = strfind( msgItem, "+([%d]*)" )
 		if a then
-			if a == 1 then
+			if b == 1 then
 				msgItem, msg = strsplit( " ", msg, 2 )
 				plusCount = tonumber(msgItem)
 			end
-			--print( "found a + ", a, b, plusCount )
+			-- print( "found a + ", a, b, plusCount )
 			if plusCount then
 				plusUnit, msg = strsplit( " ", msg, 2 )
 				if plusUnits[plusUnit] then
