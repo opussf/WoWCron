@@ -479,18 +479,24 @@ function wowCron.AtCommand( msg, isGlobal )
 end
 
 function wowCron.AtAddEntry( msg )
+	if string.len(msg) == 0 then return; end
 	msg = string.lower( msg )
 	print( "AtAddEntry( "..msg.." )" )
+
 	local shortcuts = { ["noon"] = "12:00:00", ["midnight"] = "00:00:00", ["teatime"] = "16:00:00" }
-	local targetTime = date( "*t", time()+70 )
+	local targetTime = date( "*t", time() )
 	shortcuts.now = date( "%H:%M", time(targetTime) )
 	shortcuts.tomorrow = date( "%m%d%Y", time()+86400 )
 
 	local targetTime = date( "*t" )
 	targetTime.sec = 0
+
+	local plusUnits = { ["minutes"] = 60, ["hours"] = 3600, ["days"] = 86400, ["weeks"] = 604800}
+	local plusValue = 0
 	-- for k,v in pairs( targetTime ) do
 	-- 	print( k, v )
 	-- end
+
 	msgItem, msg = strsplit( " ", msg, 2 )
 
 	while( msgItem ) do -- only parse as part of the time string.  A command starts with a "/"
@@ -498,7 +504,7 @@ function wowCron.AtAddEntry( msg )
 		-- find and replace 'shortcut' string
 		msgItem = shortcuts[msgItem] or msgItem
 
-		print( "parsing: -->"..msgItem.."<-- with :"..(msg or "nil")..": left over" )
+		--print( "parsing: -->"..msgItem.."<-- with :"..(msg or "nil")..": left over" )
 		-- find a date.  Do this first because the time string is 'funky'
 		_, _, month, split, day, year = strfind( msgItem, "([%d]?%d)([/.-])([%d%d]+)[/]?([%d%d]*)" )
 		if not split and (string.len( msgItem ) == 6 or string.len( msgItem ) == 8) then
@@ -533,9 +539,6 @@ function wowCron.AtAddEntry( msg )
 			targetTime.year = year
 			parsed = true
 		end
-		-- for k,v in pairs( targetTime ) do
-		-- 	print( k, v )
-		-- end
 
 		--print( "After date parse: "..date( "%x %X", time( targetTime ) ) )
 
@@ -564,6 +567,21 @@ function wowCron.AtAddEntry( msg )
 			targetTime.hour = targetTime.hour + 12
 		end
 
+		a, b, plusCount = strfind( msgItem, "+([%d]*)" )
+		if a then
+			if a == 1 then
+				msgItem, msg = strsplit( " ", msg, 2 )
+				plusCount = tonumber(msgItem)
+			end
+			--print( "found a + ", a, b, plusCount )
+			if plusCount then
+				plusUnit, msg = strsplit( " ", msg, 2 )
+				if plusUnits[plusUnit] then
+					plusValue = plusCount * plusUnits[plusUnit]
+				end
+			end
+		end
+
 		if( strfind( msgItem, "^/[%a]+" ) ) then
 			msg = msgItem..( msg and " "..msg or "")
 			msgItem = nil
@@ -574,18 +592,19 @@ function wowCron.AtAddEntry( msg )
 		-- print( date( "-->%x %X", time( targetTime ) ) )
 
 	end
-	print( "Final -->"..(msg or "nil").."<--" )
+	--print( "Final -->"..(msg or "nil").."<--" )
 
-	targetTS = time( targetTime )
-	if( targetTS < time()) then
+	targetTS = time( targetTime ) + plusValue
+	if( targetTS < time()-60) then
 		targetTS = targetTS + 86400
-		print( date( "-->%x %X", targetTS ) )
+		--print( date( "-->%x %X", targetTS ) )
 	end
+
+	print( date( "-->%x %X", targetTS ) )
 
 	atTable = wowCron.global and at_global or at_player
 	atTable[targetTS] = atTable[targetTS] or {}
 	table.insert( atTable[targetTS], msg )
-	print( "now: "..time().." target: "..targetTS )
-
+	--print( "now: "..time().." target: "..targetTS )
 
 end
