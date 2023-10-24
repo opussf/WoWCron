@@ -468,7 +468,7 @@ wowCron.AtCommandList = {
 function wowCron.AtCommand( msg, isGlobal )
 	wowCron.global = isGlobal
 	cmd, parameters = wowCron.DeconstructCmd( msg )
-	print( cmd, parameters )
+	--print( cmd, parameters )
 	cmd = string.lower( cmd )
 	local cmdFunc = wowCron.AtCommandList[cmd]
 	if cmdFunc then
@@ -477,19 +477,43 @@ function wowCron.AtCommand( msg, isGlobal )
 		wowCron.AtAddEntry( msg )
 	end
 end
+
+wowCron.splitCommands = {
+
+}
+
 function wowCron.AtAddEntry( msg )
 	msg = string.lower( msg )
 	print( "AtAddEntry( "..msg.." )" )
 	local shortcuts = { ["noon"] = "12:00:00", ["midnight"] = "00:00:00", ["teatime"] = "16:00:00" }
+	-- local targetTime = date( "*t", time()+90 )
+	--  ^^^  use this to create now, tomorrow, etc. shortcuts.
+
 	local targetTime = date( "*t" )
+
+	targetTime.sec = 0
+	-- for k,v in pairs( targetTime ) do
+	-- 	print( k, v )
+	-- end
 	msgItem, msg = strsplit( " ", msg, 2 )
 
-	while( msgItem and msg ) do -- only parse as part of the time string.  A command starts with a "/"
-		print( "parsing: -->"..msgItem.."<--:".. msg..":" )
+	while( msgItem ) do -- only parse as part of the time string.  A command starts with a "/"
+		local parsed = false
+		-- find and replace 'shortcut' string
+		msgItem = shortcuts[msgItem] or msgItem
+
+		print( "parsing: -->"..msgItem.."<-- with :"..(msg or "nil")..": left over" )
 		-- find a date.  Do this first because the time string is 'funky'
 		_, _, month, split, day, year = strfind( msgItem, "([%d]?%d)([/.-])([%d%d]+)[/]?([%d%d]*)" )
+		if not split and (string.len( msgItem ) == 6 or string.len( msgItem ) == 8) then
+			print( "found a 6 or 8 digit date" )
+			print( strfind( msgItem, "(%d%d)(%d%d)(%d[%d]+)" ) )
+			a, _, month, day, year = strfind( msgItem, "(%d%d)(%d%d)(%d[%d]+)" )
+			if a then
+				split = "/"
+			end
+		end
 		-- date of the form MMDD[CC]YY, MM/DD/[CC]YY, DD.MM.[CC]YY or [CC]YY-MM-DD.
-
 		if( split == "." ) then
 			d = day
 			day = month
@@ -501,54 +525,64 @@ function wowCron.AtAddEntry( msg )
 			month = day
 			day = y
 		end
-		print( ( month or "nil").."/"..(day or "nil").."/"..(year or "nil").." split:"..( split or "nil" ) )
-		if( split ) then  -- having split says this is a date.
+
+		-- print( "unswapped: "..( month or "nil").."/"..(day or "nil").."/"..(year or "nil").." split:"..( split or "nil" ) )
+		if( split ) then  -- split is / . or - (making this a date)
 			targetTime.month = month
 			targetTime.day = day
 			year = tonumber( year ) or targetTime.year
-			print( year )
 			if( tonumber( year ) < 100 ) then
 				century = math.floor( targetTime.year / 100 ) * 100
 				year = century + year
 			end
 			targetTime.year = year
+			parsed = true
+		end
+		for k,v in pairs( targetTime ) do
+			print( k, v )
 		end
 
+		print( "After date parse: "..date( "%x %X", time( targetTime ) ) )
 
-		-- find and replace 'shortcut' string
-		msgItem = shortcuts[msgItem] or msgItem
+		if not parsed then
 
-		--break
+			-- find a time string
+			if( tonumber( msgItem ) and tonumber( msgItem ) < 1000 ) then -- if the item is a number less than 1000, add a "0" to the start.
+				msgItem = "0"..msgItem
+			end
+			a, b, hourIn, minIn = strfind( msgItem, "([%d]?%d)[:]*([%d%d]+)" )
+			print( msgItem, a, b, hourIn, minIn )
 
-		-- find a time string
-		if( tonumber( msgItem ) and tonumber( msgItem ) < 1000 ) then -- if the item is a number less than 1000, add a "0" to the start.
-			msgItem = "0"..msgItem
-		end
-		a, b, hourIn, minIn, secIn = strfind( msgItem, "([%d]?%d)[:]?([%d%d]+)[:]?([%d%d]*)" )
-		print( msgItem, a, b, hourIn, minIn, secIn )
-
-		print( "msgItem (time): "..msgItem.." > "..( hourIn or "nil")..":"..( minIn or "nil" )..":"..( secIn or "nil" ) )
-		if( hourIn ) then
-			targetTime.hour = tonumber( hourIn )
-		end
-		if( minIn ) then
-			targetTime.min = tonumber( minIn )
-		end
-		if( secIn ) then
-			targetTime.sec = tonumber( secIn ) or 0
+			print( "msgItem (time): "..msgItem.." > "..( hourIn or "nil")..":"..( minIn or "nil" ) )
+			if( hourIn ) then
+				targetTime.hour = tonumber( hourIn )
+			end
+			if( minIn ) then
+				targetTime.min = tonumber( minIn )
+			end
+			-- if( secIn ) then
+			-- 	targetTime.sec = tonumber( secIn ) or 0
+			-- end
 		end
 
 		-- find AM/PM and modify the time
 		_, _, AMPM = strfind( msgItem, "([ap]m)" )
-		if( AMPM and targetTime["hour"] <= 12 and AMPM == "pm" ) then
+		if( AMPM and targetTime.hour <= 12 and AMPM == "pm" ) then
 			targetTime.hour = targetTime.hour + 12
 		end
 
+		if( strfind( msgItem, "^/[%a]+" ) ) then
+			msg = msgItem..( msg and " "..msg or "")
+			msgItem = nil
+		else
+			msgItem, msg = strsplit( " ", msg, 2 )
+		end
+
 		print( date( "-->%x %X", time( targetTime ) ) )
-		msgItem, msg = strsplit( " ", msg, 2 )
 
 	end
-	print( "Final -->"..msgItem.."<--" )
+	print( "Final -->"..(msg or "nil").."<--" )
+
 	targetTS = time( targetTime )
 	if( targetTS < time()) then
 		targetTS = targetTS + 86400
@@ -557,7 +591,7 @@ function wowCron.AtAddEntry( msg )
 
 	atTable = wowCron.global and at_global or at_player
 	atTable[targetTS] = atTable[targetTS] or {}
-	table.insert( atTable[targetTS], msgItem )
+	table.insert( atTable[targetTS], msg )
 	print( "now: "..time().." target: "..targetTS )
 
 
