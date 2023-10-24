@@ -477,7 +477,6 @@ function wowCron.AtCommand( msg, isGlobal )
 		wowCron.AtAddEntry( msg )
 	end
 end
-
 function wowCron.AtAddEntry( msg )
 	if string.len(msg) == 0 then return; end
 	msg = string.lower( msg )
@@ -603,5 +602,4 @@ function wowCron.AtAddEntry( msg )
 	atTable[targetTS] = atTable[targetTS] or {}
 	table.insert( atTable[targetTS], msg )
 	--print( "now: "..time().." target: "..targetTS )
-
 end

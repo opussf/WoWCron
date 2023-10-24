@@ -9,9 +9,9 @@ Add the /at command.
 
 Let's assume the current time is 10:00 AM, Tuesday, October 18, 2014.
 
-noon                 12:00 PM October 18 2014
-midnight             12:00 AM October 19 2014
-teatime              4:00 PM October 18 2014
+noon                 12:00 PM October 18 2014   -> 12:00
+midnight             12:00 AM October 19 2014   -> 00:00
+teatime              4:00 PM October 18 2014    -> 16:00
 tomorrow             10:00 AM October 19 2014
 noon tomorrow        12:00 PM October 19 2014
 next week            10:00 AM October 25 2014
@@ -28,6 +28,8 @@ NOV                  10:00 AM November 18 2014
 2:30 PM Oct 21       2:30 PM October 21 2014
 2:30 PM 10/21/2014   2:30 PM October 21 2014
 2:30 PM 21.10.14     2:30 PM October 21 2014
+102114               10:00 AM October 21 2014
+10212014             10:00 AM October 21 2014
 now + 30 minutes     10:30 AM October 18 2014
 now + 1 hour         11:00 AM October 18 2014
 now + 2 days         10:00 AM October 20 2014
@@ -35,6 +37,16 @@ now + 2 days         10:00 AM October 20 2014
 now + 3 weeks        10:00 AM November 8 2014
 now + 4 months       10:00 AM February 18 2015
 now + 5 years        10:00 AM October 18 2019
+
+     The at utility allows some moderately complex time specifications.  It accepts times of the form HHMM or HH:MM to run a
+     job at a specific time of day.  (If that time is already past, the next day is assumed.)  As an alternative, the
+     following keywords may be specified: midnight, noon, or teatime (4pm) and time-of-day may be suffixed with AM or PM for
+     running in the morning or the evening.  The day on which the job is to be run may also be specified by giving a date in
+     the form month-name day with an optional year, or giving a date of the forms DD.MM.YYYY, DD.MM.YY, MM/DD/YYYY, MM/DD/YY,
+     MMDDYYYY, or MMDDYY.  The specification of a date must follow the specification of the time of day.  Time can also be
+     specified as: [now] + count time-units, where the time-units can be minutes, hours, days, weeks, months or years and at
+     may be told to run the job today by suffixing the time with today and to run the job tomorrow by suffixing the time with
+     tomorrow.  The shortcut next can be used instead of + 1.
 
  You can also say what day the job will be run, by giving a date in the form month-name day with an optional year, or giving a date of the form MMDD[CC]YY, MM/DD/[CC]YY, DD.MM.[CC]YY or [CC]YY-MM-DD.
 
