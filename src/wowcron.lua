@@ -478,19 +478,15 @@ function wowCron.AtCommand( msg, isGlobal )
 	end
 end
 
-wowCron.splitCommands = {
-
-}
-
 function wowCron.AtAddEntry( msg )
 	msg = string.lower( msg )
 	print( "AtAddEntry( "..msg.." )" )
 	local shortcuts = { ["noon"] = "12:00:00", ["midnight"] = "00:00:00", ["teatime"] = "16:00:00" }
-	-- local targetTime = date( "*t", time()+90 )
-	--  ^^^  use this to create now, tomorrow, etc. shortcuts.
+	local targetTime = date( "*t", time()+70 )
+	shortcuts.now = date( "%H:%M", time(targetTime) )
+	shortcuts.tomorrow = date( "%m%d%Y", time()+86400 )
 
 	local targetTime = date( "*t" )
-
 	targetTime.sec = 0
 	-- for k,v in pairs( targetTime ) do
 	-- 	print( k, v )
@@ -506,8 +502,7 @@ function wowCron.AtAddEntry( msg )
 		-- find a date.  Do this first because the time string is 'funky'
 		_, _, month, split, day, year = strfind( msgItem, "([%d]?%d)([/.-])([%d%d]+)[/]?([%d%d]*)" )
 		if not split and (string.len( msgItem ) == 6 or string.len( msgItem ) == 8) then
-			print( "found a 6 or 8 digit date" )
-			print( strfind( msgItem, "(%d%d)(%d%d)(%d[%d]+)" ) )
+			--print( "found a 6 or 8 digit date" )
 			a, _, month, day, year = strfind( msgItem, "(%d%d)(%d%d)(%d[%d]+)" )
 			if a then
 				split = "/"
@@ -538,11 +533,11 @@ function wowCron.AtAddEntry( msg )
 			targetTime.year = year
 			parsed = true
 		end
-		for k,v in pairs( targetTime ) do
-			print( k, v )
-		end
+		-- for k,v in pairs( targetTime ) do
+		-- 	print( k, v )
+		-- end
 
-		print( "After date parse: "..date( "%x %X", time( targetTime ) ) )
+		--print( "After date parse: "..date( "%x %X", time( targetTime ) ) )
 
 		if not parsed then
 
@@ -551,9 +546,7 @@ function wowCron.AtAddEntry( msg )
 				msgItem = "0"..msgItem
 			end
 			a, b, hourIn, minIn = strfind( msgItem, "([%d]?%d)[:]*([%d%d]+)" )
-			print( msgItem, a, b, hourIn, minIn )
-
-			print( "msgItem (time): "..msgItem.." > "..( hourIn or "nil")..":"..( minIn or "nil" ) )
+			--print( "msgItem (time): "..msgItem.." > "..( hourIn or "nil")..":"..( minIn or "nil" ) )
 			if( hourIn ) then
 				targetTime.hour = tonumber( hourIn )
 			end
@@ -578,7 +571,7 @@ function wowCron.AtAddEntry( msg )
 			msgItem, msg = strsplit( " ", msg, 2 )
 		end
 
-		print( date( "-->%x %X", time( targetTime ) ) )
+		-- print( date( "-->%x %X", time( targetTime ) ) )
 
 	end
 	print( "Final -->"..(msg or "nil").."<--" )
