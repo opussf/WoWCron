@@ -474,6 +474,27 @@ function wowCron.Print( msg, showName)
 	end
 	DEFAULT_CHAT_FRAME:AddMessage( msg )
 end
+function wowCron.spairs( t )
+	local keys={}
+	for k in pairs(t) do keys[#keys+1] = k end
+	table.sort( keys )
+	local i = 0
+	return function()
+		i = i + 1
+		if keys[i] then
+			return keys[i], t[keys[i]]
+		end
+	end
+end
+function wowCron.AtList()
+	atTable = wowCron.global and at_global or at_player
+	wowCron.Print( "listing at entries for "..( wowCron.global and "global" or "personal" ) )
+	for ts, struct in wowCron.spairs( atTable ) do
+		for _, cmd in ipairs( struct ) do
+			print( date( "%c", ts)..": "..cmd )
+		end
+	end
+end
 wowCron.AtCommandList = {
 	["help"] = {
 		["func"] = wowCron.PrintHelp,
@@ -482,6 +503,10 @@ wowCron.AtCommandList = {
 	["global"] = {
 		["func"] = function( msg ) wowCron.AtCommand( msg, true ); end,
 		["help"] = {"<commands>", "Sets global flag" },
+	},
+	["list"] = {
+		["func"] = wowCron.AtList,
+		["help"] = {"", "List" },
 	},
 }
 function wowCron.AtCommand( msg, isGlobal )
@@ -600,12 +625,11 @@ function wowCron.AtAddEntry( msg )
 		if( strfind( msgItem, "^/[%a]+" ) ) then
 			msg = msgItem..( msg and " "..msg or "")
 			msgItem = nil
-		else
+		elseif msg then
 			msgItem, msg = strsplit( " ", msg, 2 )
+		else msgItem = nil
 		end
-
 		-- print( date( "-->%x %X", time( targetTime ) ) )
-
 	end
 	--print( "Final -->"..(msg or "nil").."<--" )
 
@@ -615,10 +639,13 @@ function wowCron.AtAddEntry( msg )
 		--print( date( "-->%x %X", targetTS ) )
 	end
 
-	print( date( "@ %x %X do: ", targetTS )..msg )
-
-	atTable = wowCron.global and at_global or at_player
-	atTable[targetTS] = atTable[targetTS] or {}
-	table.insert( atTable[targetTS], msg )
-	--print( "now: "..time().." target: "..targetTS )
+	if msg then
+		print( date( "@ %x %X do: ", targetTS )..msg )
+		atTable = wowCron.global and at_global or at_player
+		atTable[targetTS] = atTable[targetTS] or {}
+		table.insert( atTable[targetTS], msg )
+		--print( "now: "..time().." target: "..targetTS )
+	else
+		print( "Error detected duing parse of AT command.")
+	end
 end

@@ -634,11 +634,22 @@ function test.testAT_Global_now()
 	wowCron.AtCommand( "global now /mm dps" )
 	assertTrue( at_global[dateTable.nowTS] )
 end
-function test.testAT_Things()
-	now = time()
+function test.testAT_at_player_adds_to_toRun()
+	dateTable = test.buildTestTimeStrings()
 	wowCron.AtCommand( "now /now" )
 	wowCron.BuildRunNowList()
 	assertEquals( "/now", wowCron.toRun[3] )
+	assertIsNil( at_player[dateTable.nowTS] )
+end
+function test.testAT_ListCommand()
+	dateTable = test.buildTestTimeStrings()
+	wowCron.AtCommand( "now /now" )
+	wowCron.AtCommand( "now + 1 hours /later" )
+	wowCron.AtCommand( "tomorrow /tomorrow" )
+	wowCron.AtCommand( "list" )
+end
+function test.testAT_Oops()
+	wowCron.AtCommand( "oops" )
 end
 --[[
 
