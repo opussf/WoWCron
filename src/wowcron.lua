@@ -499,7 +499,7 @@ end
 function wowCron.AtAddEntry( msg )
 	if string.len(msg) == 0 then return; end
 	msg = string.lower( msg )
-	print( "AtAddEntry( "..msg.." )" )
+	-- print( "AtAddEntry( "..msg.." )" )
 
 	local shortcuts = { ["noon"] = "12:00:00", ["midnight"] = "00:00:00", ["teatime"] = "16:00:00" }
 	local targetTime = date( "*t", time() )
@@ -615,7 +615,7 @@ function wowCron.AtAddEntry( msg )
 		--print( date( "-->%x %X", targetTS ) )
 	end
 
-	print( date( "-->%x %X<--", targetTS ), msg )
+	print( date( "@ %x %X do: ", targetTS )..msg )
 
 	atTable = wowCron.global and at_global or at_player
 	atTable[targetTS] = atTable[targetTS] or {}

@@ -484,9 +484,6 @@ end
 ----------
 -- AT
 ----------
-----------
--- AT
-----------
 function test.buildTestTimeStrings()
 	-- %p (am/pm)   -- fun trivia,  +1 day +1 hour = +90000 seconds
 	target = date( "*t", time()+86400 )  -- +1 day
@@ -636,6 +633,12 @@ function test.testAT_Global_now()
 	dateTable = test.buildTestTimeStrings()
 	wowCron.AtCommand( "global now /mm dps" )
 	assertTrue( at_global[dateTable.nowTS] )
+end
+function test.testAT_Things()
+	now = time()
+	wowCron.AtCommand( "now /now" )
+	wowCron.BuildRunNowList()
+	assertEquals( "/now", wowCron.toRun[3] )
 end
 --[[
 
