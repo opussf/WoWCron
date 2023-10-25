@@ -17,7 +17,7 @@ COLOR_END = "|r"
 
 cron_global = {}
 cron_player = {}
-at_gloabl = {}
+at_global = {}
 at_player = {}
 
 cron_knownSlashCmds = {}
@@ -156,10 +156,10 @@ function wowCron.BuildRunNowList()
 	-- AT cmds
 	local at_structs = { at_global, at_player }
 	now = time()
-	for _, at_struct in ipairs( at_structs ) do
-		print( _, at_struct )
-		for ts, struct in pairs(at_struct) do
-			print( "ts:", ts, struct )
+	for _, at_struct in pairs( at_structs ) do
+		-- print( _, at_struct )
+		for ts, struct in pairs( at_struct ) do
+			-- print( "ts:", ts, struct )
 			if ts < time()-300 then -- missed by more than 5 minutes
 				at_struct[ts] = nil
 			elseif ts <= time() then -- give it a ~5 minute grace period
