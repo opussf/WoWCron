@@ -58,6 +58,8 @@ wowCron.toRun = {}
 function wowCron.OnLoad()
 	SLASH_CRON1 = "/CRON"
 	SlashCmdList["CRON"] = function(msg) wowCron.Command(msg); end
+	SLASH_AT1 = "/AT"
+	SlashCmdList["AT"] = function(msg) wowCron.AtCommand(msg); end
 	wowCron_Frame:RegisterEvent( "ADDON_LOADED" )
 	wowCron_Frame:RegisterEvent( "PLAYER_ENTERING_WORLD" )
 	wowCron_Frame:RegisterEvent( "LOADING_SCREEN_DISABLED" )
@@ -155,7 +157,9 @@ function wowCron.BuildRunNowList()
 	local at_structs = { at_global, at_player }
 	now = time()
 	for _, at_struct in ipairs( at_structs ) do
+		print( _, at_struct )
 		for ts, struct in pairs(at_struct) do
+			print( "ts:", ts, struct )
 			if ts < time()-300 then -- missed by more than 5 minutes
 				at_struct[ts] = nil
 			elseif ts <= time() then -- give it a ~5 minute grace period
@@ -611,7 +615,7 @@ function wowCron.AtAddEntry( msg )
 		--print( date( "-->%x %X", targetTS ) )
 	end
 
-	print( date( "-->%x %X", targetTS ) )
+	print( date( "-->%x %X<--", targetTS ), msg )
 
 	atTable = wowCron.global and at_global or at_player
 	atTable[targetTS] = atTable[targetTS] or {}
