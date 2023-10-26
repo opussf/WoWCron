@@ -32,7 +32,7 @@ jobs:
 
       # Runs a single command using the runners shell
       - name: Build with ant
-        run: ant package; ls ./target/*.zip*
+        run: ant curse; ls ./target/*.zip*
 
       - name: Create Release
         id: create_release
@@ -52,3 +52,15 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
         with:
           asset_paths: '["./target/*.zip*"]'
+
+      - name: Pushes to another repository
+        uses: cpina/github-action-push-to-another-repository@main
+        env:
+          SSH_DEPLOY_KEY: ${{ secrets.SSH_DEPLOY_KEY }}
+          API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
+        with:
+          source-directory: 'WoWCron-cf'
+          # destination-github-username: 'cpina'
+          destination-repository-name: 'wowcron-test'
+          # user-email:
+          target-branch: master

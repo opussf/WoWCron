@@ -646,6 +646,6 @@ function wowCron.AtAddEntry( msg )
 		table.insert( atTable[targetTS], msg )
 		--print( "now: "..time().." target: "..targetTS )
 	else
-		print( "Error detected duing parse of AT command.")
+		print( "Error detected with AT command.")
 	end
 end
