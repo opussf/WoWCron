@@ -61,6 +61,6 @@ jobs:
         with:
           source-directory: 'WoWCron-cf'
           # destination-github-username: 'cpina'
-          destination-repository-name: 'wowcron-test'
+          destination-repository-name: 'opussf/wowcron-test'
           # user-email:
           target-branch: master
