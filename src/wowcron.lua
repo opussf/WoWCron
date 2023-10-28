@@ -428,15 +428,22 @@ function wowCron.MoveEntry( strIn )
 		local _, _, srcIndex, tarIndex = strfind( strIn, "(%d+)%s(%d+)" )
 		srcIndex = tonumber( srcIndex )
 		tarIndex = tonumber( tarIndex )
-		tarIndex = math.min( tarIndex, #cronTable )
-		if tarIndex <= 0 then tarIndex = 1; end
-		if (#cronTable >= srcIndex) then
-			mvCmd = table.remove( cronTable, srcIndex )
-			wowCron.Print( "Moving "..mvCmd.." from index: "..srcIndex.." to index: "..tarIndex )
-			table.insert( cronTable, tarIndex, mvCmd )
+		if srcIndex and tarIndex then
+			tarIndex = math.min( tarIndex, #cronTable )
+			if tarIndex <= 0 then tarIndex = 1; end
+			if (#cronTable >= srcIndex) then
+				mvCmd = table.remove( cronTable, srcIndex )
+				wowCron.Print( "Moving "..mvCmd.." from index: "..srcIndex.." to index: "..tarIndex )
+				table.insert( cronTable, tarIndex, mvCmd )
+			end
+			wowCron.List()
+		else
+			wowCron.Print( "From and to index need to be given and be numberic." )
 		end
+	else
+		wowCron.Print( "Usage: mv fromIndex toIndex" )
 	end
-	wowCron.List()
+
 end
 function wowCron.ListMacros()
 	wowCron.Print( "Available macros:" )
