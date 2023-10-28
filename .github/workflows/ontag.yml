@@ -53,12 +53,12 @@ jobs:
         with:
           asset_paths: '["./target/*.zip*"]'
 
-      - name: Pushes to another repository
-        uses: cpina/github-action-push-to-another-repository@main
-        env:
-          SSH_DEPLOY_KEY: ${{ secrets.SSH_DEPLOY_KEY }}
-        with:
-          source-directory: 'WoWCron-cf'
-          destination-github-username: 'opussf'
-          destination-repository-name: 'wowcron-test'
-          target-branch: master
+      # - name: Pushes to another repository
+      #   uses: cpina/github-action-push-to-another-repository@main
+      #   env:
+      #     SSH_DEPLOY_KEY: ${{ secrets.SSH_DEPLOY_KEY }}
+      #   with:
+      #     source-directory: 'WoWCron-cf'
+      #     destination-github-username: 'opussf'
+      #     destination-repository-name: 'wowcron-test'
+      #     target-branch: master
