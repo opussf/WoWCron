@@ -525,15 +525,15 @@ end
 wowCron.AtCommandList = {
 	["help"] = {
 		["func"] = wowCron.PrintHelp,
-		["help"] = {"", "Print this help." },
+		["help"] = { "", "Print this help." },
 	},
 	["global"] = {
 		["func"] = function( msg ) wowCron.AtCommand( msg, true ); end,
-		["help"] = {"<commands>", "Sets global flag" },
+		["help"] = { "<commands>", "Sets global flag" },
 	},
 	["list"] = {
 		["func"] = wowCron.AtList,
-		["help"] = {"", "List" },
+		["help"] = { "", "List" },
 	},
 }
 function wowCron.AtCommand( msg, isGlobal )

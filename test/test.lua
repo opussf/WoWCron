@@ -287,6 +287,15 @@ function test.testCmd_player_rm()
 	wowCron.Command("rm 1")
 	assertEquals( 0, #cron_player )
 end
+function test.testCmd_player_mv()
+	cron_player = { "3", "1", "2" }
+	wowCron.Command("mv 1 4")
+	for k,v in pairs( cron_player ) do
+		if ( k ~= tonumber(v) ) then
+			fail( "cron_player in wrong order" )
+		end
+	end
+end
 function test.testCmd_global_add_default()
 	wowCron.Command("global * * * * * /cron list")
 	assertEquals( "* * * * * /cron list", cron_global[6] )
@@ -479,7 +488,6 @@ function test.testEventMacro_Remove_RemovesCommandFromEventCommands()
 	print("PLAYER_MONEY list")
 	wowCron.BuildRunNowList()
 	wowCron.PLAYER_MONEY()
-
 end
 ----------
 -- AT
@@ -638,7 +646,7 @@ function test.testAT_at_player_adds_to_toRun()
 	dateTable = test.buildTestTimeStrings()
 	wowCron.AtCommand( "now /now" )
 	wowCron.BuildRunNowList()
-	assertEquals( "/now", wowCron.toRun[3] )
+	assertEquals( "/now", wowCron.toRun[#wowCron.toRun] )
 	assertIsNil( at_player[dateTable.nowTS] )
 end
 function test.testAT_ListCommand()
@@ -648,8 +656,17 @@ function test.testAT_ListCommand()
 	wowCron.AtCommand( "tomorrow /tomorrow" )
 	wowCron.AtCommand( "list" )
 end
-function test.testAT_Oops()
+function test.notestAT_Oops()
+	wowCron.AtCommand( "now /now" )
+	wowCron.AtCommand( "now + 1 hours /later" )
+	wowCron.AtCommand( "tomorrow /tomorrow" )
+	wowCron.AtCommand( "now /now as well" )
+	wowCron.AtCommand( "list" )
+	for k,v in pairs( at_player ) do
+		print( k, v )
+	end
 	wowCron.AtCommand( "oops" )
+	fail("Write this once the method is figured out.")
 end
 --[[
 
