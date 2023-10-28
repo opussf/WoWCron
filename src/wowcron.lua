@@ -422,6 +422,22 @@ function wowCron.AddEntry( entry )
 	end
 	wowCron.ParseAll()
 end
+function wowCron.MoveEntry( strIn )
+	if strlen( strIn ) >= 3 then
+		cronTable = wowCron.global and cron_global or cron_player
+		local _, _, srcIndex, tarIndex = strfind( strIn, "(%d+)%s(%d+)" )
+		srcIndex = tonumber( srcIndex )
+		tarIndex = tonumber( tarIndex )
+		tarIndex = math.min( tarIndex, #cronTable )
+		if tarIndex <= 0 then tarIndex = 1; end
+		if (#cronTable >= srcIndex) then
+			mvCmd = table.remove( cronTable, srcIndex )
+			wowCron.Print( "Moving "..mvCmd.." from index: "..srcIndex.." to index: "..tarIndex )
+			table.insert( cronTable, tarIndex, mvCmd )
+		end
+	end
+	wowCron.List()
+end
 function wowCron.ListMacros()
 	wowCron.Print( "Available macros:" )
 	for macro, struct in pairs( wowCron.macros ) do
@@ -445,6 +461,10 @@ wowCron.CommandList = {
 	["rm"] = {
 		["func"] = wowCron.RemoveEntry,
 		["help"] = {"index", "Remove index entry."}
+	},
+	["mv"] = {
+		["func"] = wowCron.MoveEntry,
+		["help"] = {"fromIndex toIndex", "Move from to"}
 	},
 	["add"] = {
 		["func"] = wowCron.AddEntry,
