@@ -175,7 +175,6 @@ function wowCron.RunNowList()
 	-- run a single item from the list per update
 	if (#wowCron.toRun > 0) then
 		cmd = table.remove( wowCron.toRun, 1 )
-		--print("CMD: "..(cmd or "nil"))
 		if cmd then
 			slash, parameters = wowCron.DeconstructCmd( cmd )
 			if wowCron.debug then print("do now: "..slash.." "..parameters) end
