@@ -1,7 +1,7 @@
 -----------------------------------------
 -- Author  :  Opussf
 -- Date    :  August 13 2024
--- Revision:  9.4.3-16-g4300a9c
+-- Revision:  9.4.3-17-g11678c7
 -----------------------------------------
 -- These are functions from wow that have been needed by addons so far
 -- Not a complete list of the functions.
@@ -902,6 +902,8 @@ function C_AddOns.GetNumAddOns()
 	return 1
 end
 function C_AddOns.LoadAddOn( addonName )
+end
+function C_AddOns.DisableAddOn( addonName, playerName )
 end
 
 C_Container = {}
