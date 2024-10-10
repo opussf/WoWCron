@@ -45,6 +45,7 @@ wowCron.macros = {  -- keep a 1 to 1 mapping for macro to event.
 	["@gold"]     = { ["event"] = "PLAYER_MONEY" },
 	["@level"]    = { ["event"] = "PLAYER_LEVEL_UP" },
 	["@zone"]     = { ["event"] = "ZONE_CHANGED_NEW_AREA" },
+	["@bag"]      = { ["event"] = "BAG_UPDATE_DELAYED" },
 }
 wowCron.chatChannels = {
 	["/s"]    = "SAY",
