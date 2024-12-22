@@ -1,7 +1,7 @@
 -----------------------------------------
 -- Author  :  Opussf
--- Date    :  December 12 2024
--- Revision:  9.5-15-gcefc9c2
+-- Date    :  December 22 2024
+-- Revision:  9.5-16-gbc1a113
 -----------------------------------------
 -- These are functions from wow that have been needed by addons so far
 -- Not a complete list of the functions.
@@ -1593,6 +1593,9 @@ end
 function UnitFactionGroup( who )
 	-- http://www.wowwiki.com/API_UnitFactionGroup
 	return unpack( Units[who].faction )
+end
+function UnitIsBattlePet( who )
+	return Units[who].isBattlePet
 end
 function UnitIsDeadOrGhost( who )
 end
