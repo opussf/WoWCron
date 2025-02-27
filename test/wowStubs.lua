@@ -1,7 +1,7 @@
 -----------------------------------------
 -- Author  :  Opussf
--- Date    :  December 22 2024
--- Revision:  9.5-16-gbc1a113
+-- Date    :  December 23 2024
+-- Revision:  9.5-17-g1916682
 -----------------------------------------
 -- These are functions from wow that have been needed by addons so far
 -- Not a complete list of the functions.
@@ -225,10 +225,11 @@ FACTION_STANDING_LABEL5 = "Friendly"
 FACTION_STANDING_LABEL6 = "Honored"
 FACTION_STANDING_LABEL7 = "Revered"
 FACTION_STANDING_LABEL8 = "Exalted"
-FACTION_STANDING_INCREASED = "Reputation with %s increased by %d"
-FACTION_STANDING_DECREASED = "Reputation with %s decreased by %d"
-FACTION_STANDING_INCREASED_ACCOUNT_WIDE = "Your Warband's reputation with %s increased by %d"
-FACTION_STANDING_DECREASED_ACCOUNT_WIDE = "Your Warband's reputation with %s decreased by %d"
+FACTION_STANDING_INCREASED = "Reputation with %s increased by %d."
+FACTION_STANDING_DECREASED = "Reputation with %s decreased by %d."
+FACTION_STANDING_INCREASED_GUARDIAN = "%s has gained %d guardian experience points."
+FACTION_STANDING_INCREASED_ACCOUNT_WIDE = "Your Warband's reputation with %s increased by %d."
+FACTION_STANDING_DECREASED_ACCOUNT_WIDE = "Your Warband's reputation with %s decreased by %d."
 
 COMBATLOG_OBJECT_AFFILIATION_OUTSIDER = 8
 COMBATLOG_XPGAIN_FIRSTPERSON = "%s dies, you gain %d experience."
