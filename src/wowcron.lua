@@ -57,6 +57,10 @@ wowCron.chatChannels = {
 	["/guild"]= "GUILD",
 	["/y"]    = "YELL",
 	["/yell"] = "YELL",
+	["/emote"]= "EMOTE",
+	["/em"]   = "EMOTE",
+	["/e"]    = "EMOTE",
+	["/me"]   = "EMOTE",
 }
 wowCron.toRun = {}
 -- events
