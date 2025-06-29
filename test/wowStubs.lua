@@ -1,7 +1,7 @@
 -----------------------------------------
 -- Author  :  Opussf
--- Date    :  April 24 2025
--- Revision:  9.5.1
+-- Date    :  June 23 2025
+-- Revision:  9.5.1-7-g826b11b
 -----------------------------------------
 -- These are functions from wow that have been needed by addons so far
 -- Not a complete list of the functions.
@@ -30,6 +30,14 @@ chatLog = {
 
 local itemDB = {
 }
+
+_G["GUILD"] = "Guild"
+_G["INSTANCE"] = "instance"
+_G["PARTY"] = "Party"
+_G["RAID"] = "Raid"
+_G["SAY"] = "Say"
+_G["WHISPER"] = "Whisper"
+_G["YELL"] = "Yell"
 
 -- simulate an internal inventory
 -- myInventory = { ["9999"] = 52, }
@@ -651,7 +659,13 @@ function CreateButton( name, ... )
 	me.name = name
 	return me
 end
-
+function UIDropDownMenu_Initialize( self )
+end
+function UIDropDownMenu_JustifyText( self, justify )
+end
+function UIDropDownMenu_GetText( self )
+	return ""
+end
 function ChatFrame_AddMessageEventFilter()
 end
 
@@ -1201,9 +1215,25 @@ function GetNumRoutes( nodeId )
 	-- returns numHops
 	return TaxiNodes[nodeId].hops
 end
+mySavedInstances = {}
+-- mySavedInstances = { { "raidName", id, secondsUntilLockResets, difficulty(number),
+--      isLocked(bool), isExtended(bool), instanceIDMostSig?(number), isRaid(bool),
+--      maxPlayers(number), "difficulty", numEncounters(number), encounterProgress(number),
+--      {{bossName, fileDataID, isKilled, unknown}, {}, ...} }, {}, ... }
 function GetNumSavedInstances()
-	-- @TODO: Research this
-	return 0
+	-- https://addonstudio.org/wiki/WoW:API_GetNumSavedInstances
+	--     numInstances (Number) - number of instances saved to, zero if none
+	-- See GetSavedInstanceInfo
+	return #mySavedInstances
+end
+function GetSavedInstanceInfo( index )
+	-- https://addonstudio.org/wiki/WoW:API_GetSavedInstanceInfo
+	-- name, id, reset, difficulty, locked, extended, instanceIDMostSig, isRaid, maxPlayers, difficultyName, numEncounters, encounterProgress = GetSavedInstanceInfo(index)
+	-- add the above info as a table to mySavedInstances
+	return table.unpack( mySavedInstances[index] )
+end
+function GetSavedInstanceEncounterInfo( raidIndex, bossIndex )
+	return table.unpack( mySavedInstances[raidIndex][13][bossIndex] )
 end
 -- GetNumTradeSkills is deprecated
 --function GetNumTradeSkills( )
@@ -1855,15 +1885,21 @@ myMacros = {
 		table.sort( myMacros.personal, function( l, r ) return( l.name < r.name ); end )
 	end,
 }
+function GetNumMacros()
+	-- return number of global, number of personal
+	return #myMacros.general, #myMacros.personal
+end
 function GetMacroInfo( macroName )
 	-- returns:  macroName, macroIcon, macroText
 	if macroName then
-		local mIndex = GetMacroIndexByName( macroName )
+		local mIndex = tonumber(macroName) or GetMacroIndexByName( macroName )
 		if mIndex ~= 0 then
 			local location = mIndex > 120 and "personal" or "general"
 			mIndex = mIndex>120 and mIndex-120 or mIndex
-			return myMacros[location][mIndex].name, myMacros[location][mIndex].icon, myMacros[location][mIndex].text
-    	end
+			if myMacros[location][mIndex] then
+				return myMacros[location][mIndex].name, myMacros[location][mIndex].icon, myMacros[location][mIndex].text
+			end
+		end
 	end
 end
 function GetMacroIndexByName( macroName )
@@ -2077,6 +2113,14 @@ function C_DateAndTime.GetCurrentCalendarTime()
 	out.isdst = nil
 	out.sec = nil
 	return out
+end
+
+-------
+-- EventRegistry
+-------
+EventRegistry = {}
+
+function EventRegistry.RegisterCallback( self )
 end
 
 -- A SAX parser takes a content handler, which provides these methods:
