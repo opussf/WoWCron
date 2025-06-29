@@ -46,6 +46,11 @@ wowCron.macros = {  -- keep a 1 to 1 mapping for macro to event.
 	["@level"]    = { ["event"] = "PLAYER_LEVEL_UP" },
 	["@zone"]     = { ["event"] = "ZONE_CHANGED_NEW_AREA" },
 	["@crit"]     = { ["event"] = "COMBAT_LOG_EVENT_UNFILTERED" },
+	["@boss"]     = { ["event"] = "BOSS_KILL" },
+	["@combat"]   = { ["event"] = "PLAYER_REGEN_DISABLED" },
+	["@regen"]    = { ["event"] = "PLAYER_REGEN_ENABLED" },
+	["@xp"]       = { ["event"] = "PLAYER_XP_UPDATE" },
+	["@rest"]     = { ["event"] = "PLAYER_UPDATE_RESTING" },
 }
 wowCron.chatChannels = {
 	["/s"]    = "SAY",
@@ -589,7 +594,8 @@ function wowCron.AtAddEntry( msg )
 	local targetTime = date( "*t" )
 	targetTime.sec = 0
 
-	local plusUnits = { ["minutes"] = 60, ["hours"] = 3600, ["days"] = 86400, ["weeks"] = 604800}
+	local plusUnits = { ["minutes"] = 60, ["hours"] = 3600, ["days"] = 86400, ["weeks"] = 604800,
+			["min"] = 60, ["hour"] = 3600, ["day"] = 86400, ["week"] = 604800 }
 	local plusValue = 0
 
 	msgItem, msg = strsplit( " ", msg, 2 )
