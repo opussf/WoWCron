@@ -45,6 +45,7 @@ wowCron.macros = {  -- keep a 1 to 1 mapping for macro to event.
 	["@gold"]     = { ["event"] = "PLAYER_MONEY" },
 	["@level"]    = { ["event"] = "PLAYER_LEVEL_UP" },
 	["@zone"]     = { ["event"] = "ZONE_CHANGED_NEW_AREA" },
+	-- ["@bag"]      = { ["event"] = "BAG_UPDATE_DELAYED" },
 	["@boss"]     = { ["event"] = "BOSS_KILL" },
 	["@combat"]   = { ["event"] = "PLAYER_REGEN_DISABLED" },
 	["@regen"]    = { ["event"] = "PLAYER_REGEN_ENABLED" },
@@ -53,6 +54,8 @@ wowCron.macros = {  -- keep a 1 to 1 mapping for macro to event.
 	["@achv"]     = { ["event"] = "ACHIEVEMENT_EARNED" },
 	["@rcheck"]   = { ["event"] = "READY_CHECK" },
 	["@rdone"]    = { ["event"] = "READY_CHECK_FINISHED" },
+	["@invite"]   = { ["event"] = "PARTY_INVITE_REQUEST" },
+	["@mog"]      = { ["event"] = "TRANSMOG_DISPLAYED_OUTFIT_CHANGED" },
 }
 wowCron.chatChannels = {
 	["/s"]    = "SAY",
