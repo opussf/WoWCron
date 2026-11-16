@@ -46,6 +46,14 @@ wowCron.macros = {  -- keep a 1 to 1 mapping for macro to event.
 	["@level"]    = { ["event"] = "PLAYER_LEVEL_UP" },
 	["@zone"]     = { ["event"] = "ZONE_CHANGED_NEW_AREA" },
 	["@bag"]      = { ["event"] = "BAG_UPDATE_DELAYED" },
+	["@boss"]     = { ["event"] = "BOSS_KILL" },
+	["@combat"]   = { ["event"] = "PLAYER_REGEN_DISABLED" },
+	["@regen"]    = { ["event"] = "PLAYER_REGEN_ENABLED" },
+	["@xp"]       = { ["event"] = "PLAYER_XP_UPDATE" },
+	["@ilvl"]     = { ["event"] = "PLAYER_AVG_ITEM_LEVEL_UPDATE" },
+	["@achv"]     = { ["event"] = "ACHIEVEMENT_EARNED" },
+	["@rcheck"]   = { ["event"] = "READY_CHECK" },
+	["@rdone"]    = { ["event"] = "READY_CHECK_FINISHED" },
 }
 wowCron.chatChannels = {
 	["/s"]    = "SAY",
@@ -54,6 +62,10 @@ wowCron.chatChannels = {
 	["/guild"]= "GUILD",
 	["/y"]    = "YELL",
 	["/yell"] = "YELL",
+	["/emote"]= "EMOTE",
+	["/em"]   = "EMOTE",
+	["/e"]    = "EMOTE",
+	["/me"]   = "EMOTE",
 }
 wowCron.toRun = {}
 -- events
@@ -68,7 +80,7 @@ function wowCron.OnLoad()
 end
 function wowCron.OnUpdate()
 	-- if there are still events in the queue to process
-	if( #wowCron.toRun > 0 ) then
+	if( #wowCron.toRun > 0 and not InCombatLockdown() ) then
 		wowCron.RunNowList()
 	end
 	local nowTS = time()
@@ -82,6 +94,7 @@ function wowCron.ADDON_LOADED()
 	wowCron.lastUpdated = time()
 	wowCron.ParseAll()
 	wowCron.BuildSlashCommands()
+	wowCron.playerGUID = UnitGUID("player")
 end
 function wowCron.PLAYER_ENTERING_WORLD()
 	wowCron_Frame:UnregisterEvent( "PLAYER_ENTERING_WORLD" )
@@ -208,7 +221,7 @@ function wowCron.CallEmote( slash, parameters )
 	token = string.upper(strsub( slash, -(strlen( slash )-1) ))
 	for _,v in pairs( cron_knownEmotes ) do
 		if token == v then
-			DoEmote(token)
+			C_ChatInfo.PerformEmote(token)
 			return true
 		end
 	end
@@ -219,7 +232,7 @@ function wowCron.SendMessage( slash, parameters )
 	-- look for the standard chat commands and send the contents of parameters to the corrisponding channel
 	for cmd, channel in pairs( wowCron.chatChannels ) do
 		if slash == cmd then
-			SendChatMessage( parameters, channel, nil, nil )
+			C_ChatInfo.SendChatMessage( parameters, channel, nil, nil )
 			return true
 		end
 	end
@@ -242,10 +255,10 @@ function wowCron.BuildSlashCommands()
 		count = count + 1
 		--wowCron.Print(string.format("% 2i : %s :: %s", count, k, type(v)))
 		cron_knownSlashCmds[k] = v
-		lcv = 1
+		local lcv = 1
 		while true do
 			teststr = "SLASH_"..k..lcv
-			gggg = _G[ teststr ]
+			local gggg = _G[ teststr ]
 			if not gggg then break end
 			--print("_G["..teststr.."] = "..gggg)
 			cron_knownSlashCmds[gggg] = v
@@ -409,8 +422,8 @@ function wowCron.RemoveEntry( index )
 	if index and index>0 and index<=#cronTable then
 		local entry = table.remove( cronTable, index )
 		wowCron.Print( COLOR_RED.."REMOVING: "..COLOR_END..entry )
+		wowCron.ParseAll()
 	end
-	wowCron.ParseAll()
 end
 function wowCron.AddEntry( entry )
 	if strlen( entry ) >= 9 then -- VERY mimimum size of a cron is 9 char (5x * and 4 spaces)
@@ -439,7 +452,7 @@ function wowCron.MoveEntry( strIn )
 			end
 			wowCron.List()
 		else
-			wowCron.Print( "From and to index need to be given and be numberic." )
+			wowCron.Print( "From and to index need to be given and be numeric." )
 		end
 	else
 		wowCron.Print( "Usage: mv fromIndex toIndex" )
@@ -448,7 +461,7 @@ function wowCron.MoveEntry( strIn )
 end
 function wowCron.ListMacros()
 	wowCron.Print( "Available macros:" )
-	for macro, struct in pairs( wowCron.macros ) do
+	for macro, struct in wowCron.spairs( wowCron.macros ) do
 		wowCron.Print( string.format( "%s : %s \"%s\"",
 				macro, (struct.cron and "expands to" or "run on event"), (struct.cron or struct.event) ) )
 	end
@@ -562,7 +575,8 @@ function wowCron.AtAddEntry( msg )
 	local targetTime = date( "*t" )
 	targetTime.sec = 0
 
-	local plusUnits = { ["minutes"] = 60, ["hours"] = 3600, ["days"] = 86400, ["weeks"] = 604800}
+	local plusUnits = { ["minutes"] = 60, ["hours"] = 3600, ["days"] = 86400, ["weeks"] = 604800,
+			["min"] = 60, ["hour"] = 3600, ["day"] = 86400, ["week"] = 604800 }
 	local plusValue = 0
 
 	msgItem, msg = strsplit( " ", msg, 2 )

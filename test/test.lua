@@ -10,6 +10,7 @@ wowCron_Frame = CreateFrame()
 ParseTOC( "../src/wowcron.toc" )
 
 function test.before()
+	chatLog = {}
 	cron_player = {"* * * * * /in item:54233 7" }
 	cron_global = {
 		"* 0 * * * /happy",
@@ -488,6 +489,10 @@ function test.testEventMacro_Remove_RemovesCommandFromEventCommands()
 	print("PLAYER_MONEY list")
 	wowCron.BuildRunNowList()
 	wowCron.PLAYER_MONEY()
+end
+function test.testEventMacro_List()
+	wowCron.Command("macros")
+	assertEquals( "|cffcfb52bWoWCron|r> Available macros:", chatLog[1].msg )
 end
 ----------
 -- AT
