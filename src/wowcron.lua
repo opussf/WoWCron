@@ -54,6 +54,8 @@ wowCron.macros = {  -- keep a 1 to 1 mapping for macro to event.
 	["@achv"]     = { ["event"] = "ACHIEVEMENT_EARNED" },
 	["@rcheck"]   = { ["event"] = "READY_CHECK" },
 	["@rdone"]    = { ["event"] = "READY_CHECK_FINISHED" },
+	["@invite"]   = { ["event"] = "PARTY_INVITE_REQUEST" },
+	["@mog"]      = { ["evnet"] = "TRANSMOG_DISPLAYED_OUTFIT_CHANGED" },
 }
 wowCron.chatChannels = {
 	["/s"]    = "SAY",
